@@ -1,4 +1,9 @@
 ---- Notes on specific data sets ----
+Episode 20: Gripper grabs onto the object very close to the back of the
+            gripper itself. May influence position values 
+
+Episode 26: The gripper comes into contact with the target causing the 
+            box and socket to move slightly 
 
 Episode 34: After grabbing the object, the arm reaches the target a
             first time, swings violently off the target, then reaches
