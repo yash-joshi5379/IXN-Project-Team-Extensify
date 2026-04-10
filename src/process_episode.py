@@ -3,8 +3,8 @@ import subprocess
 import os
 
 # --- Configuration (THIS IS ALL YOU NEED TO CHANGE PER EPSISODE) ---
-EPISODE = "episode_000001"   # Episode number (ensure the number has 6 characters) 
-END_FRAME = 434              # The exact frame the task finishes (obtained from find_end_frame.py)
+EPISODE = "episode_000045"   # Episode number (ensure the number has 6 characters) 
+END_FRAME = 452              # The exact frame the task finishes (obtained from find_end_frame.py)
 # -------------------------------------------------------------------
 
 # --- Directory configs (DON'T CHANGE THESE) ---
