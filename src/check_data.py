@@ -2,7 +2,7 @@ import pandas as pd
 import cv2
 
 # -----------RUN THIS AFTER YOU PROCESS ANY EPISODE (JUST CHANGE EPISODE NUMBER)---------------
-EPISODE = "episode_000001"
+EPISODE = "episode_000013"
 
 # test if we can read episode data file
 df = pd.read_parquet(f"dataset/processed/data/{EPISODE}.parquet")

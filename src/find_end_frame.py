@@ -2,7 +2,7 @@ import cv2
 
 # Change this to whatever episode and camera angle you are checking
 # WHEN CHANGING CAMERA ANGLE, JUST CHANGE onboard_camera TO static_camera AND VICE VERSA
-VIDEO_PATH = "dataset/raw/videos/static_camera/episode_000045.mp4"
+VIDEO_PATH = "dataset/raw/videos/static_camera/episode_000013.mp4"
 
 cap = cv2.VideoCapture(VIDEO_PATH)
 frame_idx = 0
