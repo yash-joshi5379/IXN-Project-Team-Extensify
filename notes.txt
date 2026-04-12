@@ -1,3 +1,13 @@
+----- After verifing with LeRobot Visualiser -----
+Episode_000000 - NOT VALID, gripper plot is too noisy in Action and State plots and video is choppy
+Episode_000001 - valid
+
+
+
+
+
+
+
 ---- Notes on specific data sets ----
 Episode 20: Gripper grabs onto the object very close to the back of the
             gripper itself. May influence position values 
