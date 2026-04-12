@@ -1,6 +1,18 @@
 ----- After verifying with LeRobot Visualiser -----
 Episode_000000 - NOT VALID, gripper plot is too noisy in Action and State plots and video is choppy
 Episode_000001 - valid
+Episode_000002 - valid
+Episode_000003 - valid
+Episode_000004 - valid
+Episode_000005 - valid
+Episode_000006 - valid
+Episode_000007 - valid
+Episode_000008 - valid
+Episode_000009 - valid
+Episode_000010 - NOT VALID, gripper doesn't pick up cylinder on first try
+Episode_000011 - valid, but gripper hesitates before picking up cylinder
+Episode_000012 - valid
+Episode_000013 - valid
 
 Episode_000014 - valid
 Episode_000015 - valid
@@ -57,9 +69,9 @@ Episode_000062 - valid
 Episode_000063 - valid
 Episode_000064 - valid
 Episode_000065 - valid
-Episode_000066 - train error (Yash will handle)
-Episode_000067 - train error (Yash will handle)
-Episode_000068 - train error (Yash will handle)
+Episode_000066 - NOT VALID, too many failed attempts at picking up cylinder
+Episode_000067 - valid
+Episode_000068 - valid
 
 
 
