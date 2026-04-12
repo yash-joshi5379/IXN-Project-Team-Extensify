@@ -1,4 +1,4 @@
------ After verifing with LeRobot Visualiser -----
+----- After verifying with LeRobot Visualiser -----
 Episode_000000 - NOT VALID, gripper plot is too noisy in Action and State plots and video is choppy
 Episode_000001 - valid
 
@@ -16,6 +16,22 @@ Episode_000024 - valid
 Episode_000025 - valid
 Episode_000026 - valid
 Episode_000027 - valid
+
+Episode_000028 - valid
+Episode_000029 - valid  
+Episode_000030 - valid
+Episode_000031 - valid
+Episode_000032 - valid (slight disturbance in the state/action as gripper opens) 
+Episode_000033 - valid 
+Episode_000034 - valid (slight disturbance in the state/action as gripper closes and opens) 
+Episode_000035 - valid
+Episode_000036 - valid (slight disturbance in the state/action as gripper opens)
+Episode_000037 - valid
+Episode_000038 - valid
+Episode_000039 - valid
+Episode_000040 - valid (slight disturbance in the state/action as gripper opens)
+Episode_000041 - valid
+Episode_000042 - valid 
 
 Episode_000056 - valid
 Episode_000057 - valid
@@ -44,6 +60,8 @@ Episode 20: Gripper grabs onto the object very close to the back of the
 
 Episode 26: The gripper comes into contact with the target causing the 
             box and socket to move slightly 
+
+Episode 29: The first grasp clutch attempt was unsuccessful
 
 Episode 34: After grabbing the object, the arm reaches the target a
             first time, swings violently off the target, then reaches
