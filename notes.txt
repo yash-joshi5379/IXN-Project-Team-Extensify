@@ -33,6 +33,20 @@ Episode_000040 - valid (slight disturbance in the state/action as gripper opens)
 Episode_000041 - valid
 Episode_000042 - valid 
 
+Episode_000043 - valid
+Episode_000044 - valid
+Episode_000045 - valid
+Episode_000046 - valid
+Episode_000047 - valid
+Episode_000048 - valid
+Episode_000049 - valid
+Episode_000050 - valid
+Episode_000051 - valid
+Episode_000052 - valid
+Episode_000053 - valid
+Episode_000054 - valid
+Episode_000055 - valid
+
 Episode_000056 - valid
 Episode_000057 - valid
 Episode_000058 - valid
