@@ -1,8 +1,8 @@
 {
   "codebase_version": "v3.0",
   "robot_type": "xarm",
-  "total_episodes": 69,
-  "total_frames": 26194,
+  "total_episodes": 66,
+  "total_frames": 24726,
   "total_tasks": 1,
   "total_videos": 138,
   "total_chunks": 1,

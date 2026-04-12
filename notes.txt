@@ -73,6 +73,9 @@ Episode_000066 - NOT VALID, too many failed attempts at picking up cylinder
 Episode_000067 - valid
 Episode_000068 - valid
 
+# After verifying with LeRobot viz, episodes 66, 10 and 0 have been removed
+# All remaining episodes have been renumbered and new meta files generated.
+
 
 
 

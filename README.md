@@ -216,3 +216,18 @@ python src\visualise_episode.py 47    # To visualise episode 47
 5. If the episode meets all 4 requirements, write ```Episode_xxxxxx - valid``` in ```notes.txt```. If not, make a note in ```notes.txt``` and describe which requirement is not met.
 
 6. Repeat for all other allocated episodes.
+
+## Cleaning Dataset
+Using the LeRobot visualiser, we can see if any videos or data plots contain disturbances or sharp jumps. If they do, we do not want to contain this episode in our final dataset for model training, as this erroneous data could worsen our model.
+
+1. To remove an episode, activate your venv, navigate to the project root directory, and run ```src\remove_episode.py x``` where ```x``` is the episode number to be removed. E.g.
+```
+(.venv) ...\IXN-Project-Team-Extensify>python src\remove_episode.py 0       # to remove episode 0
+```
+
+Note: After removing an episode, all subsequent episodes are renumbered, so if you want to remove multiple episodes, remove the **highest numbered episode first** and **lowest numbered episode last**. E.g.
+```
+python src\remove_episode.py 66   # remove highest numbered episode first
+python src\remove_episode.py 17   # then lower ones
+python src\remove_episode.py 0    # and lowest numbered episode last
+```
