@@ -213,6 +213,6 @@ lerobot-dataset-viz --repo-id local/cylinder-pick-place --root dataset\processed
 - the action and state plots move together with no sudden jumps
 - the next.done plot shows only a single spike at the very end and nothing else
 
-5. If the episode meets all 4 requirements, move to the next episode. If not, make a note in ```notes.txt``` and describe which requirement is not met.
+5. If the episode meets all 4 requirements, write ```Episode_xxxxxx - valid``` in ```notes.txt```. If not, make a note in ```notes.txt``` and describe which requirement is not met.
 
 6. Repeat for all other allocated episodes.
