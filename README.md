@@ -162,3 +162,57 @@ Video frame dimensions (height, wdith, channels): (256, 256, 3)     # Must be (2
 ```
 
 7. Repeat this whole preprocessing sequence for all your episodes.
+
+## Using the LeRobot Visualiser
+Once all data has been processed, we must verify it is accurate before training a VLA model. To do this, we will use the LeRobot Visualiser to simultaneously view videos and data plots for each episode.
+
+1. Open the project folder, activate your venv and go into the main project directory.
+```
+...\IXN-Project-Team-Extensify>.venv\Scripts\activate       # activate venv
+(.venv) ...\IXN-Project-Team-Extensify>                     # you should see this
+```
+
+2. From the project root directory, run this command:
+```
+(.venv) ...\IXN-Project-Team-Extensify>lerobot-dataset-viz --repo-id local/cylinder-pick-place --root dataset\processed --mode local --episode-index 0
+```
+
+A Rerun window should open and after a few seconds, you should see:
+- Both camera feeds (static and wrist cameras) playing simultaneously
+- Action data plot (7 arm joints & gripper commands)
+- State data plot (7 arm joints & gripper joint angles)
+- next.done data plot (Boolean flag that spikes at the final frame of the episode)
+
+Note: After running the command above, many things will be printed in the terminal as well as a progress bar, showing how long it will take to render the plots and video footages. Once this progress bar reaches 100%, all data has fully loaded, so then press the play button in the Rerun window to watch the videos and plots move smoothly over time.
+```
+100%|████████████████████████████████████████████████████████████████████████████████████| 31/31 [01:17<00:00,  2.50s/it]
+
+# Press the play button in the Rerun window once this reaches 100%
+```
+
+Note: If you get this error: **`lerobot-dataset-viz` command not found:**, try this command:
+```
+python -m lerobot.scripts.lerobot_dataset_viz --repo-id local/cylinder-pick-place --root dataset\processed --mode local --episode-index 0
+```
+
+Note: If you get this error: **`ModuleNotFoundError: rerun`:**, try installing rerun again:
+```
+(.venv) ...\IXN-Project-Team-Extensify> pip install rerun-sdk
+```
+
+Note: If the Rerun window opens but shows no data, make sure you run the ```lerobot-dataset-viz``` command from the main project directory ```(.venv) ...\IXN-Project-Team-Extensify>```.
+
+3. Once you have the visualiser working, you can change the episode number. To do this, in the command above, change ```--episode-index 0``` to any number between 0 and 68. E.g.
+```
+lerobot-dataset-viz --repo-id local/cylinder-pick-place --root dataset\processed --mode local --episode-index 47    # To visualise episode 47
+```
+
+4. For each episode, verify the following criteria:
+- the videos end with the cylinder in the slot
+- the gripper channel in the action plot rises from 0 to 1 during pick-up
+- the action and state plots move together with no sudden jumps
+- the next.done plot shows only a single spike at the very end and nothing else
+
+5. If the episode meets all 4 requirements, move to the next episode. If not, make a note in ```notes.txt``` and describe which requirement is not met.
+
+6. Repeat for all other allocated episodes.
