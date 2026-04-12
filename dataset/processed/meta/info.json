@@ -1,0 +1,176 @@
+{
+  "codebase_version": "v3.0",
+  "robot_type": "xarm",
+  "total_episodes": 69,
+  "total_frames": 26194,
+  "total_tasks": 1,
+  "total_videos": 138,
+  "total_chunks": 1,
+  "chunks_size": 1000,
+  "fps": 30,
+  "splits": {
+    "train": "0:69"
+  },
+  "data_path": "data/chunk-{chunk_index:03d}/episode_{file_index:06d}.parquet",
+  "video_path": "videos/chunk-{chunk_index:03d}/{video_key}/episode_{file_index:06d}.mp4",
+  "features": {
+    "observation.images.wrist_cam": {
+      "dtype": "video",
+      "shape": [
+        256,
+        256,
+        3
+      ],
+      "names": [
+        "height",
+        "width",
+        "channel"
+      ],
+      "video_info": {
+        "video.fps": 30.0,
+        "video.codec": "h264",
+        "video.pix_fmt": "yuv420p",
+        "video.is_depth_map": false
+      }
+    },
+    "observation.images.static_cam": {
+      "dtype": "video",
+      "shape": [
+        256,
+        256,
+        3
+      ],
+      "names": [
+        "height",
+        "width",
+        "channel"
+      ],
+      "video_info": {
+        "video.fps": 30.0,
+        "video.codec": "h264",
+        "video.pix_fmt": "yuv420p",
+        "video.is_depth_map": false
+      }
+    },
+    "observation.state": {
+      "dtype": "float32",
+      "shape": [
+        8
+      ],
+      "names": [
+        "j1",
+        "j2",
+        "j3",
+        "j4",
+        "j5",
+        "j6",
+        "j7",
+        "gripper"
+      ]
+    },
+    "action": {
+      "dtype": "float32",
+      "shape": [
+        8
+      ],
+      "names": [
+        "j1",
+        "j2",
+        "j3",
+        "j4",
+        "j5",
+        "j6",
+        "j7",
+        "gripper"
+      ]
+    },
+    "observation.qvel": {
+      "dtype": "float32",
+      "shape": [
+        8
+      ],
+      "names": [
+        "j1",
+        "j2",
+        "j3",
+        "j4",
+        "j5",
+        "j6",
+        "j7",
+        "gripper"
+      ]
+    },
+    "observation.effort": {
+      "dtype": "float32",
+      "shape": [
+        8
+      ],
+      "names": [
+        "j1",
+        "j2",
+        "j3",
+        "j4",
+        "j5",
+        "j6",
+        "j7",
+        "gripper"
+      ]
+    },
+    "timestamp": {
+      "dtype": "float32",
+      "shape": [
+        1
+      ],
+      "names": null
+    },
+    "frame_index": {
+      "dtype": "int64",
+      "shape": [
+        1
+      ],
+      "names": null
+    },
+    "episode_index": {
+      "dtype": "int64",
+      "shape": [
+        1
+      ],
+      "names": null
+    },
+    "index": {
+      "dtype": "int64",
+      "shape": [
+        1
+      ],
+      "names": null
+    },
+    "task_index": {
+      "dtype": "int64",
+      "shape": [
+        1
+      ],
+      "names": null
+    },
+    "next.done": {
+      "dtype": "bool",
+      "shape": [
+        1
+      ],
+      "names": null
+    },
+    "observation.force_torque": {
+      "dtype": "float32",
+      "shape": [
+        6
+      ],
+      "names": [
+        "fx",
+        "fy",
+        "fz",
+        "tx",
+        "ty",
+        "tz"
+      ]
+    }
+  }
+}
