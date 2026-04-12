@@ -30,3 +30,17 @@ Episode 40: Arm takes a long time to reach initial object
 
 Episode 41: Arm starts very far from object so takes longer to reach
             initial object
+Episode_000014 - valid
+Episode_000015 - valid
+Episode_000016 - valid
+Episode_000017 - valid
+Episode_000018 - valid
+Episode_000019 - valid
+Episode_000020 - valid
+Episode_000021 - valid
+Episode_000022 - valid
+Episode_000023 - valid
+Episode_000024 - valid
+Episode_000025 - valid
+Episode_000026 - valid
+Episode_000027 - valid
