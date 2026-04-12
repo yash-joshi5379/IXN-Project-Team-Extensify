@@ -174,7 +174,7 @@ Once all data has been processed, we must verify it is accurate before training 
 
 2. From the project root directory, run this command:
 ```
-(.venv) ...\IXN-Project-Team-Extensify>lerobot-dataset-viz --repo-id local/cylinder-pick-place --root dataset\processed --mode local --episode-index 0
+(.venv) ...\IXN-Project-Team-Extensify>python src\visualise_episode.py 0
 ```
 
 A Rerun window should open and after a few seconds, you should see:
@@ -200,11 +200,11 @@ Note: If you get this error: **`ModuleNotFoundError: rerun`:**, try installing r
 (.venv) ...\IXN-Project-Team-Extensify> pip install rerun-sdk
 ```
 
-Note: If the Rerun window opens but shows no data, make sure you run the ```lerobot-dataset-viz``` command from the main project directory ```(.venv) ...\IXN-Project-Team-Extensify>```.
+Note: If the Rerun window opens but shows no data, make sure you run the ```python src\visualise_episode.py 0``` command from the main project directory ```(.venv) ...\IXN-Project-Team-Extensify>```.
 
-3. Once you have the visualiser working, you can change the episode number. To do this, in the command above, change ```--episode-index 0``` to any number between 0 and 68. E.g.
+3. Once you have the visualiser working, you can change the episode number. To do this, in the command above, change ```python src\visualise_episode.py 0``` to any number between 0 and 68. E.g.
 ```
-lerobot-dataset-viz --repo-id local/cylinder-pick-place --root dataset\processed --mode local --episode-index 47    # To visualise episode 47
+python src\visualise_episode.py 47    # To visualise episode 47
 ```
 
 4. For each episode, verify the following criteria:
