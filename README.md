@@ -239,9 +239,38 @@ In order to train our VLA models, we need GPUs for parallel processing and compl
 ```
 https://www.ucl.ac.uk/isd/services/get-connected/ucl-virtual-private-network-vpn
 ```
-This webpage contains connection guides and clear instructions for installing the Cisco Anyconnect VPN onto Windows and MacOS devices. Linux installation is possible but not clearly documented. Check ```linux-vpn-install.md``` for a guide on installing the VPN on Linux devices.
+This webpage contains connection guides and clear instructions for installing the Cisco Anyconnect VPN onto Windows and MacOS devices. Linux installation is possible but not clearly documented on UCL's website, so check ```linux-vpn-install.md``` in this repo for a guide on installing the VPN on Linux devices.
 
 2. Once the VPN is installed, we can access the Remote Workstation Service. Enter the following URL into a web browser:
 ```
 https://tsg.cs.ucl.ac.uk/remote-gpu-workstations/
 ```
+
+3. Follow the instructions on the webpage to download the UCL CS Root CA certificate and add it to your web browser (Firefox/Chrome).
+
+4. Now activate your Cisco AnyConnect VPN, and then paste this URL: ```https://mydesk.cs.ucl.ac.uk/``` into your web browser. If you are not connected to the VPN at this stage, you will not be able to access this URL.
+
+5. Login to the UCL CS booking system using your UCL Computer Science account username and password **(NOT THE SAME AS YOUR UCL EMAIL AND PASSWORD)**. We got given these CS login details on the first day of our first year. If you cannot remember the details or have lost the details, visit this URL: ```https://tsg.cs.ucl.ac.uk/contact-us/```, and either visit Malet Place in UCL's Bloomsbury Campus or submit the CS Helpdesk Request (much easier).
+
+6. Once you have logged into the UCL CS booking system, you will see a schedule of all GPU workstations and their status (open, reserved, past .etc). You can hover over each workstation name (E.g. bumblebee.cs.ucl.ac.uk) to see which GPU it has.
+  
+7. To book a session, click on any open (white) cell for your chosen workstation. Give your reservation a title, and adapt the Begin and End times to when you want (maximum reservation time is 72 hours). Click the **Create** button to make the reservation, and you should see your reservation appear on the main schedule.
+
+8. Once your session time has started, you will need to use an SSH tunnel to access your remote GPU workstation.
+   a) **Creating an SSH Tunnel on Linux/macOS**
+
+   1. First launch a new terminal on your local laptop/PC, and run the following ssh command, substituting the host name of the machine you booked, and your UCL CS username for $CS_USER
+   ```
+   ssh -L 8081:<host>.cs.ucl.ac.uk.8443 $CS_USER@knuckes.cs.ucl.ac.uk
+   ```
+  
+   b) **Creating an SSH Tunnel on Windows**
+
+   1. Launch **WSL** in a new terminal/PowerShell window by running ```wsl``` and then ```cd```. If you do not have WSL installed, simply install it by running ```wsl --install``` in a PowerShell window. Restart your machine after installing WSL to ensure all future terminals have WSL capabilities.
+  
+   2. Now in your **WSL** terminal, run the following ssh command, substituting the host name of the machine you booked, and your UCL CS username for $CS_USER
+   ```
+   ssh -L 8081:<host>.cs.ucl.ac.uk.8443 $CS_USER@knuckes.cs.ucl.ac.uk
+   ```
+
+   Note: If this doesn't work, open a new PowerShell window and run the same command, without using WSL. If asked for a password, enter your UCL CS password.
