@@ -231,3 +231,17 @@ python src\remove_episode.py 66   # remove highest numbered episode first
 python src\remove_episode.py 17   # then lower ones
 python src\remove_episode.py 0    # and lowest numbered episode last
 ```
+
+## Setup for Accessing UCL Remote GPU Workstations
+In order to train our VLA models, we need GPUs for parallel processing and complex computations. For this, we can access remote workstations which have RTX 4070 Ti Super and RTX 4090 GPUs. Here is how to access these workstations:
+
+1. First we need to setup a VPN to access the UCL network. Enter the following URL into a web browser:
+```
+https://www.ucl.ac.uk/isd/services/get-connected/ucl-virtual-private-network-vpn
+```
+This webpage contains connection guides and clear instructions for installing the Cisco Anyconnect VPN onto Windows and MacOS devices. Linux installation is possible but not clearly documented. Check ```linux-vpn-install.md``` for a guide on installing the VPN on Linux devices.
+
+2. Once the VPN is installed, we can access the Remote Workstation Service. Enter the following URL into a web browser:
+```
+https://tsg.cs.ucl.ac.uk/remote-gpu-workstations/
+```
