@@ -257,6 +257,7 @@ https://tsg.cs.ucl.ac.uk/remote-gpu-workstations/
 7. To book a session, click on any open (white) cell for your chosen workstation. Give your reservation a title, and adapt the Begin and End times to when you want (maximum reservation time is 72 hours). Click the **Create** button to make the reservation, and you should see your reservation appear on the main schedule.
 
 8. Once your session time has started, you will need to use an SSH tunnel to access your remote GPU workstation.
+   
    a) **Creating an SSH Tunnel on Linux/macOS**
 
    1. First launch a new terminal on your local laptop/PC, and run the following ssh command, substituting the host name of the machine you booked, and your UCL CS username for $CS_USER
