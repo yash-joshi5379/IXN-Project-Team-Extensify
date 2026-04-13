@@ -258,14 +258,14 @@ https://tsg.cs.ucl.ac.uk/remote-gpu-workstations/
 
 8. Once your session time has started, you will need to use an SSH tunnel to access your remote GPU workstation.
    
-   a) **Creating an SSH Tunnel on Linux/macOS**
+   **Creating an SSH Tunnel on Linux/macOS**
 
    1. First launch a new terminal on your local laptop/PC, and run the following ssh command, substituting the host name of the machine you booked, and your UCL CS username for $CS_USER
    ```
    ssh -L 8081:<host>.cs.ucl.ac.uk.8443 $CS_USER@knuckes.cs.ucl.ac.uk
    ```
   
-   b) **Creating an SSH Tunnel on Windows**
+   **Creating an SSH Tunnel on Windows**
 
    1. Launch **WSL** in a new terminal/PowerShell window by running ```wsl``` and then ```cd```. If you do not have WSL installed, simply install it by running ```wsl --install``` in a PowerShell window. Restart your machine after installing WSL to ensure all future terminals have WSL capabilities.
   
