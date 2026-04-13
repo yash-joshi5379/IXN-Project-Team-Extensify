@@ -274,4 +274,4 @@ https://tsg.cs.ucl.ac.uk/remote-gpu-workstations/
    ssh -L 8081:<host>.cs.ucl.ac.uk.8443 $CS_USER@knuckes.cs.ucl.ac.uk
    ```
 
-   Note: If this doesn't work, open a new PowerShell window and run the same command, without using WSL. If asked for a password, enter your UCL CS password.
+      Note: If this doesn't work, open a new PowerShell window and run the same command, without using WSL. If asked for a password, enter your UCL CS password.
