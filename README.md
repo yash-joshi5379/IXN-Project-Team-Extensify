@@ -258,14 +258,14 @@ https://tsg.cs.ucl.ac.uk/remote-gpu-workstations/
 
 8. Once your session time has started, you will need to use an SSH tunnel to access your remote GPU workstation.
    
-   **Creating an SSH Tunnel on Linux/macOS**
+   *Creating an SSH Tunnel on Linux/macOS*
 
-   1. First launch a new terminal on your local laptop/PC, and run the following ssh command, substituting the host name of the machine you booked, and your UCL CS username for $CS_USER
+   1. First launch a new terminal on your local laptop/PC, and run the following ssh command, substituting the host name of the machine you booked, and your UCL CS username for $CS_USER. If asked for a password, enter your UCL CS password.
    ```
    ssh -L 8081:<host>.cs.ucl.ac.uk:8443 $CS_USER@knuckes.cs.ucl.ac.uk
    ```
   
-   **Creating an SSH Tunnel on Windows**
+   *Creating an SSH Tunnel on Windows*
 
    1. Launch **WSL** in a new terminal/PowerShell window by running ```wsl``` and then ```cd```. If you do not have WSL installed, simply install it by running ```wsl --install``` in a PowerShell window. Restart your machine after installing WSL to ensure all future terminals have WSL capabilities.
   
@@ -275,3 +275,74 @@ https://tsg.cs.ucl.ac.uk/remote-gpu-workstations/
    ```
 
       Note: If this doesn't work, open a new PowerShell window and run the same command, without using WSL. If ever asked for a password, enter your UCL CS password.
+
+**If your SSH Tunnel connection is successful, you should see comething like this:**
+```
+Last login: Mon Apr 13 23:48:58 2026 from 90.254.190.73
+>> This machine is running CentOS 7.9
+                                                   
+>> For all general enquiries, please contact the Helpdesk in 4.07, on
+   extn 37280 or e-mail 'request@cs.ucl.ac.uk'
+
+   This machines reboots on the first wednesday of each month
+>> Taught students must leave the building before midnight 
+
+** To see this message again type "cat /etc/motd"
+...
+```
+
+To double check the connection is successful, the terminal should look like ```$CS_USER@knuckles%```, with your CS username instead of $CS_USER. 
+To triple check, enter the command ```pwd``` and you should see the following output, with your UCL starting year instead of <year> and your CS username instead of $CS_USER :
+```
+$CS_USER@knuckles% pwd            # you enter pwd
+/cs/student/ug/<year>/$CS_USER    # you should see this with your starting year and CS username instead of <year> and $CS_USER       
+```
+
+**IMPORTANT: Keep this terminal window open (the successful SSH Tunnel connection), because this window is the bridge for the SSH connection. If the terminal window, closes, the connection will be lost.**
+
+9. Now that you have remotely connected to the remote GPU workstation via an SSH Tunnel, we can access this connection in VSCode. To do this, open VSCode and install the **Remote - SSH** extension.
+
+10. Open the Command Palette in VSCode by either clicking the Settings icon (bottom right corner of VSCode window) and clicking on the Command Palette option, or by using the keyboard shortcut ```Ctrl+Shift+P```. In the Command Palette, type in and select the option: **Remote-SSH: Open SSH Configuration File**, then select the option which looks like: **.../.ssh/config**. In this config file, enter the following, substituting your CS username instead of $CS_USER and the remote workstation name instead of <host> :
+```
+Host knuckles
+    HostName knuckles.cs.ucl.ac.uk
+    User $CS_USER
+
+Host ucl-gpu
+    HostName <host>.cs.ucl.ac.uk
+    User $CS_USER
+    ProxyJump knuckles
+```
+
+Then save and close this config file.
+
+11. In the bottom left corner of the VSCode window, you will see the symbol which looks like ```><``` (just under the settings icon). Click this symbol, click the **Connect to Host** option, then click the **ucl-gpu** option. A new VSCode window will appear, where you should enter your CS password in the text prompt area (you may need to enter it twice). After a few seconds, if you see **SSH: ucl-gpu** in the bottom right of the new VSCode window and no errors pop up, the connection is successful.
+
+12. To double check the connection, open a new terminal in the successfully connected VSCode window. You should see ```$CS_USER@<host>%``` in this terminal, with your CS username instead of $CS_USER and the workstation name instead of <host>. Then run the command ```nvidia-smi``` to ensure the GPU is working, and you should see smoething like the following:
+```
+$CS_USER@<host>% nvidia-smi    # you should see this starting bit in the terminal, and you should run the command 'nvidia smi'
+Tue Apr 14 00:36:46 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.126.09             Driver Version: 580.126.09     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 4070 ...    On  |   00000000:01:00.0 Off |                  N/A |
+|  0%   33C    P8             10W /  285W |      22MiB /  16376MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|    0   N/A  N/A           21752      G   /usr/libexec/Xorg                        11MiB |
++-----------------------------------------------------------------------------------------+
+```
+
+**This means we have successfully set up a remote connection to a GPU workstation in VSCode!!**
+
+## Setup for Model Training on a UCL Remote GPU Workstation
