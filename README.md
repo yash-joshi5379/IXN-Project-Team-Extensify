@@ -346,3 +346,47 @@ Tue Apr 14 00:36:46 2026
 **This means we have successfully set up a remote connection to a GPU workstation in VSCode!!**
 
 ## Setup for Model Training on a UCL Remote GPU Workstation
+The next step is to set up the code and environment on the remote workstation, in order to be able to remotely run a training script to run a VLA model.
+
+1. Ensure your remote connection is still intact by running ```pwd``` in a terminal. You should see ```/cs/student/ug/<year>/$CS_USER``` with your UCL starting year instead of <year> and your CS username instead of $CS_USER.
+
+2. **IMPORTANT - When you reserve time on a remote GPU workstation, you will have scratch space on the machine’s disk in ```/scratch0/$USER/```. Anything in this scratch space will be removed when your sessions ends, so you must ensure that you upload all work on GitHub or download it to your local machine.**
+
+Hence, we will now navigate to the personal scratch space and do everything in this scratch space. To go to your scratch space, paste ```cd /scratch0/$USER``` into your terminal. Then run a ```pwd``` command to ensure you're now in your allocated scratch space.
+```
+$CS_USER@<host>% pwd                 # check current directory before moving to scratch space
+/cs/student/ug/<year>/$CS_USER       # you should see this with your starting year and CS username
+
+$CS_USER@<host>% cd /scratch0/$USER  # use this exact command move to your scratch space
+$CS_USER@<host>% pwd                 # now check current directory after moving to scratch space
+/scratch0/$CS_USER                   # you should see this with your CS username instead of $CS_USER
+```
+
+3. In your scratch space, clone your repository, navigate to the project root directory, and open this repo in a new VSCode window. In this new VSCode window, you should still see the blue **SSH: ucl-gpu** section in the bottom left corner of the window. 
+```
+$CS_USER@<host>% git clone <repo-url>
+$CS_USER@<host>% cd <repo-name>
+$CS_USER@<host>% code .
+```
+
+4. In this new VSCode window, open a new terminal, and run ```pwd``` to ensure you are in the project root directory: **/scratch0/$CS_USER/<repo-name>**. You should also see the full project repo structure in the VSCode file explorer on the left side of the VSCode window.
+
+5. Create a venv, activate the venv, and install all requirements. This is easier to do in bash:
+```
+$CS_USER@<host>% python3 -m venv .venv
+$CS_USER@<host>% bash
+bash-5.1$ source .venv/bin/activate
+(.venv) bash-5.1$ pip install -r requirements.txt 
+```
+
+
+## Terminating Remote Workstation Connection
+```
+cd                                        # go back to your home folder
+
+rm -rf /scratch0/$CS_USER/<repo-name>     # remove the repo in your scratch space
+
+cd /scratch0/$USER                        # after removing, go to your scratch space again
+ls -l                                     # check nothing is in your scratch space now
+total 0                                   # you should see this if nothing is left in your scratch space
+```
