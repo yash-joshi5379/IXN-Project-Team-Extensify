@@ -369,18 +369,67 @@ $CS_USER@<host>% cd <repo-name>
 $CS_USER@<host>% code .
 ```
 
-4. In this new VSCode window, open a new terminal, and run ```pwd``` to ensure you are in the project root directory: **/scratch0/$CS_USER/<repo-name>**. You should also see the full project repo structure in the VSCode file explorer on the left side of the VSCode window.
+4. In this new VSCode window, open a new terminal, and run ```pwd``` to ensure you are in the project root directory: **/scratch0/$CS_USER/repo-name**. You should also see the full project repo structure in the VSCode file explorer on the left side of the VSCode window.
 
-5. Create a venv, activate the venv, and install all requirements. This is easier to do in bash:
+5. Create a venv in the scratch space, by first installing a **standalone, portable Python binary**. We need to do this because the remote workstations only have Python 3.9.25, and we need Python >= 3.12 for this project. Hence, we shall install **Python 3.13.2** :
+    1. Navigate back to your personal scratch space by running this in the terminal: ```cd /scratch0/$USER```. Confirm you are in this directory by running ```pwd``` in the terminal.
+    
+    2. Launch bash by running ```bash``` in the terminal. Your terminal lines should now begin with ```bash-5.1$``` rather than ```$CS_USER@<host>%```.
+    
+    3. Install **pyenv** by running this command:
+    ```
+    curl https://pyenv.run | bash
+
+    # You should see this output:
+
+      % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+    100   270  100   270    0     0   2673      0 --:--:-- --:--:-- --:--:--  2673
+    Cloning into '/scratch0/yjoshi/.pyenv'...
+    remote: Enumerating objects: 1527, done.
+    ...  
+    ```
+
+    4. Then run the following 4 commands to add pyenv to the load PATH and to set the cache to scratch permanently.
+    ```
+    echo 'export PYENV_ROOT="/scratch0/$USER/.pyenv"' >> ~/.bashrc
+    echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
+    echo 'eval "$(pyenv init -)"' >> ~/.bashrc
+    echo 'export PIP_CACHE_DIR="/scratch0/$USER/.pip-cache"' >> ~/.bashrc
+    ```
+
+    5. Reload your bash by running this command: ```source ~/.bashrc```
+    
+    6. Intall Python 3.13.2 by running this command: ```pyenv install 3.13.2```
+    
+    7. Set Python 3.13.2 as the local Python version for this repository with these 2 commands:
+    ```
+    cd /scratch0/$USER/<repo-name>
+    pyenv local 3.13.2
+    ```
+
+    8. Verify that these steps worked by checking your Python version, by running ```python --version``` in your bash terminal, and the output should be ```Python 3.13.2```.
+
+6. If not already there, navigate to the project root directory: ```cd /scratch0/$USER/repo-name``` Now create the venv, activate the venv, and install all requirements, all in a bash terminal:
 ```
-$CS_USER@<host>% python3 -m venv .venv
-$CS_USER@<host>% bash
+bash-5.1$ python -m venv .venv
 bash-5.1$ source .venv/bin/activate
 (.venv) bash-5.1$ pip install -r requirements.txt 
 ```
 
+7. Finally follow **instructions 3-6 inclusive** from the first section **(Installation and Setup)**, to run the ```load_data_test.py``` file, clone the Lerobot repo, install its libraries, install the full version of OpenCV, and run the ```check_data.py``` file. Both of these files should run without any errors.
+
+
+## Training a VLA Model on a UCL Remote GPU Workstation
+Now that we have set up the venv and are able to run Python scripts on the remote workstation, we move on to training a VLA model.
+
+
 
 ## Terminating Remote Workstation Connection
+
+1. Before your workstation session ends, save the files you want to keep by downloading them to your local machine, or by uploading them to a GitHub branch.
+
+2. Run these commands in VSCode to clear your personal scratch space:
 ```
 cd                                        # go back to your home folder
 
@@ -390,3 +439,5 @@ cd /scratch0/$USER                        # after removing, go to your scratch s
 ls -l                                     # check nothing is in your scratch space now
 total 0                                   # you should see this if nothing is left in your scratch space
 ```
+
+2. Close the VSCode terminal, click on the blue **SSH: ucl-gpu** button in the bottom left corner, and choose the **Close Remote Connection** option. Finally, close VSCode, close the terminal window which acted as the SSH bridge between your local machine and the remote workstation, and disconnect from the Cisco VPN. 
