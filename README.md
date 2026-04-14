@@ -262,7 +262,7 @@ https://tsg.cs.ucl.ac.uk/remote-gpu-workstations/
 
    1. First launch a new terminal on your local laptop/PC, and run the following ssh command, substituting the host name of the machine you booked, and your UCL CS username for $CS_USER. If asked for a password, enter your UCL CS password.
    ```
-   ssh -L 8081:<host>.cs.ucl.ac.uk:8443 $CS_USER@knuckes.cs.ucl.ac.uk
+   ssh -L 8081:<host>.cs.ucl.ac.uk:8443 $CS_USER@knuckles.cs.ucl.ac.uk
    ```
   
    *Creating an SSH Tunnel on Windows*
@@ -271,7 +271,7 @@ https://tsg.cs.ucl.ac.uk/remote-gpu-workstations/
   
    2. Now in your **WSL** terminal, run the following ssh command, substituting the host name of the machine you booked, and your UCL CS username for $CS_USER
    ```
-   ssh -L 8081:<host>.cs.ucl.ac.uk:8443 $CS_USER@knuckes.cs.ucl.ac.uk
+   ssh -L 8081:<host>.cs.ucl.ac.uk:8443 $CS_USER@knuckles.cs.ucl.ac.uk
    ```
 
       Note: If this doesn't work, open a new PowerShell window and run the same command, without using WSL. If ever asked for a password, enter your UCL CS password.
