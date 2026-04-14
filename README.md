@@ -348,7 +348,7 @@ Tue Apr 14 00:36:46 2026
 ## Setup for Model Training on a UCL Remote GPU Workstation
 The next step is to set up the code and environment on the remote workstation, in order to be able to remotely run a training script to run a VLA model.
 
-1. Ensure your remote connection is still intact by running ```pwd``` in a terminal. You should see ```/cs/student/ug/<year>/$CS_USER``` with your UCL starting year instead of <year> and your CS username instead of $CS_USER.
+1. Ensure your remote connection is still intact by running ```pwd``` in a terminal. You should see ```/cs/student/ug/<year>/$CS_USER``` with your UCL starting year instead of ```<year>``` and your CS username instead of ```$CS_USER```.
 
 2. **IMPORTANT - When you reserve time on a remote GPU workstation, you will have scratch space on the machine’s disk in ```/scratch0/$USER/```. Anything in this scratch space will be removed when your sessions ends, so you must ensure that you upload all work on GitHub or download it to your local machine.**
 
