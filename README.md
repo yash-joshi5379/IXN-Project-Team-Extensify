@@ -417,13 +417,34 @@ bash-5.1$ source .venv/bin/activate
 (.venv) bash-5.1$ pip install -r requirements.txt 
 ```
 
-7. Finally follow **instructions 3-6 inclusive** from the first section **(Installation and Setup)**, to run the ```load_data_test.py``` file, clone the Lerobot repo, install its libraries, install the full version of OpenCV, and run the ```check_data.py``` file. Both of these files should run without any errors.
+7. Finally follow **instructions 3-6 inclusive** from the first section **(Installation and Setup)**, to run the ```load_data_test.py``` file, clone the Lerobot repo, install its libraries, install the full version of OpenCV, and run the ```check_data.py``` file. Both of these files should run without any errors. You may need to install the Python extension on VSCode for the remote workstation.
 
 
 ## Training a VLA Model on a UCL Remote GPU Workstation
-Now that we have set up the venv and are able to run Python scripts on the remote workstation, we move on to training a VLA model.
+Now that we have set up the venv and are able to run Python scripts on the remote workstation, we move on to training a VLA model. This stage requires some steps on your local machine and some steps on the remote workstation.
 
+### Stage A - On your local machine
+1. Create an account at **https://huggingface.co/join**
 
+2. Create an access token at **https://huggingface.co/settings/tokens**, and you MUST give it **Write** permissions. Save the access token value somewhere safe.
+
+3. Ensure you are on your local machine in VSCode (>< symbol under the Settings icon should be grey). If you see the blue **SSH: ucl-gpu** button instead, follow **step 3** in the section **Terminating Remote Workstation Connection** to swtich back to your local machine instead of the remote workstation.
+
+4. Navigate to the project root directory and activate your venv. Then run the command ```pip install --upgrade huggingface_hub``` to ensure you have the latest version of Hugging Face installed in your venv. To check the installation worked, run this command ```python -c "from huggingface_hub import model_info; print(model_info('gpt2'))"``` and the output should look something like this:
+```
+ModelInfo(id='openai-community/gpt2', author='openai-community', base_models=None, card_data={'base_model': None, 'datasets': None, 'eval_results': None, 'language': 'en', 'library_name': None, 'license': 'mit', 'license_name': None, 'license_link': None, ...
+```
+
+5. To login to Hugging Face in VSCode, run the command ```hf auth login```, and paste your access token value when asked for it. Also enter ```y``` when asked to add token as git credential. You should see ```Token is valid (permission: write).```
+
+6. Run the command: ```python src/upload_to_hf.py``` in the terminal to upload the processed dataset to your personal Hugging Face account. To check the upload is successful, there should be no errors in the terminal, and you should see a dataset called ```cylinder-pick-place``` in your profile on the Hugging Face website.
+
+### Stage B - On Remote GPU Workstation
+1. Connect to your remote workstation host using VSCode. Check the instructions in the section **Setup for Accessing UCL Remote GPU Workstations** if you need help with any steps.
+
+2. Go to your scratch space by running ```cd /scratch0/$USER```, clone the repository, and go into the repo with ```cd repo-name```.
+
+3. Instead of making a venv this time, we will make a conda env for training.  
 
 ## Terminating Remote Workstation Connection
 
