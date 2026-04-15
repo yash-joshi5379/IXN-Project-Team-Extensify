@@ -1,0 +1,8 @@
+name: smolvla-gpu-train
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.12
+  - ffmpeg=7.1.1
+  - pip
