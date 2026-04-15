@@ -442,9 +442,51 @@ ModelInfo(id='openai-community/gpt2', author='openai-community', base_models=Non
 ### Stage B - On Remote GPU Workstation
 1. Connect to your remote workstation host using VSCode. Check the instructions in the section **Setup for Accessing UCL Remote GPU Workstations** if you need help with any steps.
 
-2. Go to your scratch space by running ```cd /scratch0/$USER```, clone the repository, and go into the repo with ```cd repo-name```.
+2. In a VSCode terminal, go to your scratch space by running ```cd /scratch0/$USER```, clone the repository, and go into the repo with ```cd repo-name```. Then run ```code .```to see the project repo files on the left hand side of a new VSCode window.
 
-3. Instead of making a venv this time, we will make a conda env for training.  
+3. Instead of making a venv this time, we will make a **conda env** for training. To do this, we first want to download Miniconda to our scratch space. Run these commands in a new **bash** terminal of the new VSCode window:
+```
+cd /scratch0/$USER
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+```
+
+4. Run the Miniconda installer with this command: ```bash Miniconda3-latest-Linux-x86_64.sh```. When prompted, press Enter to read the license and type yes to accept the license terms. When asked for the installation location, type ```/scratch0/$USER/miniconda3```. Then when asked to initialise Miniconda3, type yes. Finally to update our bash terminal, run the command ```source ~/.bashrc```. Your bash terminal should now start with ```(base) bash-5.1$ ```.
+
+5. Go into the project root directory with ```cd /scratch0/$USER/repo-name```. Then create the conda env and activate it by using the .yml file:
+```
+conda env create -f smolvla-gpu-train.yml -y
+conda activate smolvla-gpu-train
+```
+
+6. Your bash terminal should now begin with ```(smolvla-gpu-train) bash-5.1$ ```. Now run these commands to clone the lerobot libaries required for training SmolVLA:
+```
+git clone https://github.com/huggingface/lerobot.git
+cd lerobot
+pip install -e .
+cd ..
+```
+
+7. Type ```hf auth login``` in the bash terminal with the conda env active, and then hit Enter. Paste in your access token value when prompted to. When asked to add the token as a git credential, type ```N``` as it is not needed now.
+
+8. Type ```wandb login``` in the bash terminal and hit Enter. It will print a URL in the terminal which looks like  **https://wandb.ai/authorize...**. Open this URL in a web browser, sign up for an account (I signed up with a Google account), click on your name in the top right corner of the webpage, go to API keys, and make a new key. Copy your API key, and paste it in the bash terminal. You should see ```Currently logged in as: ... to https://api.wandb.ai.```
+
+9. Create a new **tmux** (terminal multiplexer) session in the bash terminal. This allows you to run the training session on a remote terminal so that the training does not stop if you accidentally close the terminal. To do this, use the command:
+```
+tmux new -s smolvla_train
+```
+
+10. You should see a green bar along the bottom of a new terminal window. Because tmux opens this new terminal window, run ```bash``` to make it a bash terminal, and reactivate your Conda environment with ```conda activate smolvla-gpu-train```. Run ```pip install 'lerobot[dataset]'```.  
+
+11. Before running the training session, do a final check of some important details:
+- Check the GPU is active by running ```nvidia-smi```. The **Memory-Usage** should be quite low: mine shows **22MiB /  16376MiB**
+- Open config.py to ensure the ```DATASET_REPO_ID``` exactly matches your Hugging Face username and dataset name. Also verify all hyperparameters.
+- Verify disk space by running ```df -h .``` inside your ```/scratch/$USER``` directory. You should see a low amount of used storage space (I see 28G) and lots of available storage space (I see 1.5T). You must also see **Mounted on /scratch0** to ensure you are actually in the scratch space and not in your home folder.
+- Run ```pwd``` to ensure you are in the project root directory: **/scratch0/$USER/repo-name**. Navigate to this directory if not already there.
+
+12. Once all final checks are done, run the training script with the command below. The ```tee``` command will pipe the output to your screen and save it securely to a file called ```logs.txt```
+```
+python src/vla-train/train.py 2>&1 | tee logs.txt
+``` 
 
 ## Terminating Remote Workstation Connection
 
