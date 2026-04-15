@@ -26,16 +26,15 @@ https://www.ucl.ac.uk/isd/how-to/connecting-to-ucl-vpn-linux
 cd Downloads/OneDrive_1_04-03-2026\ -\ linux\ x86_64\ 1/cisco-secure-client-linux64-5.1.15.287-predeploy-deb-k9/
 ```
 
-This will redirect you to inside the newly created folder. To check you are in the correct directory, run ```ls -l``` and you should see this:
+This will redirect you to inside the newly created folder. To check you are in the correct directory, run ```ls``` and you should see this:
 ```
-total 75652
--rw-r--r-- 1 yash yash  1636710 Feb 12 22:28 cisco-secure-client-dart_5.1.15.287_amd64.deb
--rw-r--r-- 1 yash yash  1247770 Feb 12 22:29 cisco-secure-client-iseposture_5.1.15.287_amd64.deb
--rw-r--r-- 1 yash yash 28318202 Feb 12 22:29 cisco-secure-client-nvm_5.1.15.287_amd64.deb
--rw-r--r-- 1 yash yash 35268190 Feb 12 22:29 cisco-secure-client-posture_5.1.15.287_amd64.deb
--rw-r--r-- 1 yash yash  6174838 Feb 12 22:29 cisco-secure-client-vpn_5.1.15.287_amd64.deb
--rw-r--r-- 1 yash yash  4805822 Feb 12 22:29 cisco-secure-client-vpn-cli_5.1.15.287_amd64.deb
--rw-r--r-- 1 yash yash     1627 Feb 12 22:29 CiscoSystemsInc.pgp
+cisco-secure-client-dart_5.1.15.287_amd64.deb
+cisco-secure-client-iseposture_5.1.15.287_amd64.deb
+cisco-secure-client-nvm_5.1.15.287_amd64.deb
+cisco-secure-client-posture_5.1.15.287_amd64.deb
+cisco-secure-client-vpn_5.1.15.287_amd64.deb
+cisco-secure-client-vpn-cli_5.1.15.287_amd64.deb
+CiscoSystemsInc.pgp
 ```
 
 6. Now run this command:
