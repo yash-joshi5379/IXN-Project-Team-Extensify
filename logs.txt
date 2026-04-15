@@ -1,0 +1,208 @@
+/scratch0/yjoshi/IXN-Project-Team-Extensify/lerobot/src/lerobot/policies/vqbet/vqbet_utils.py:1373: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  @autocast(enabled=False)
+INFO 2026-04-15 23:32:51 ot_train.py:207 {'batch_size': 32,
+ 'checkpoint_path': None,
+ 'cudnn_deterministic': False,
+ 'dataset': {'episodes': None,
+             'image_transforms': {'enable': False,
+                                  'max_num_transforms': 3,
+                                  'random_order': False,
+                                  'tfs': {'affine': {'kwargs': {'degrees': [-5.0,
+                                                                            5.0],
+                                                                'translate': [0.05,
+                                                                              0.05]},
+                                                     'type': 'RandomAffine',
+                                                     'weight': 1.0},
+                                          'brightness': {'kwargs': {'brightness': [0.8,
+                                                                                   1.2]},
+                                                         'type': 'ColorJitter',
+                                                         'weight': 1.0},
+                                          'contrast': {'kwargs': {'contrast': [0.8,
+                                                                               1.2]},
+                                                       'type': 'ColorJitter',
+                                                       'weight': 1.0},
+                                          'hue': {'kwargs': {'hue': [-0.05,
+                                                                     0.05]},
+                                                  'type': 'ColorJitter',
+                                                  'weight': 1.0},
+                                          'saturation': {'kwargs': {'saturation': [0.5,
+                                                                                   1.5]},
+                                                         'type': 'ColorJitter',
+                                                         'weight': 1.0},
+                                          'sharpness': {'kwargs': {'sharpness': [0.5,
+                                                                                 1.5]},
+                                                        'type': 'SharpnessJitter',
+                                                        'weight': 1.0}}},
+             'repo_id': 'yjoshi5379/cylinder-pick-place',
+             'revision': None,
+             'root': None,
+             'streaming': False,
+             'use_imagenet_stats': True,
+             'video_backend': 'torchcodec'},
+ 'env': None,
+ 'eval': {'batch_size': 16, 'n_episodes': 50, 'use_async_envs': True},
+ 'eval_freq': 20000,
+ 'job_name': 'training-run-1',
+ 'log_freq': 200,
+ 'num_workers': 4,
+ 'optimizer': {'betas': [0.9, 0.95],
+               'eps': 1e-08,
+               'grad_clip_norm': 10.0,
+               'lr': 0.0001,
+               'type': 'adamw',
+               'weight_decay': 1e-10},
+ 'output_dir': 'outputs/train/training-run-1',
+ 'peft': None,
+ 'policy': {'adapt_to_pi_aloha': False,
+            'add_image_special_tokens': False,
+            'attention_mode': 'cross_attn',
+            'chunk_size': 50,
+            'compile_mode': 'max-autotune',
+            'compile_model': False,
+            'device': 'cuda',
+            'empty_cameras': 0,
+            'expert_width_multiplier': 0.75,
+            'freeze_vision_encoder': True,
+            'input_features': {'observation.images.camera1': {'shape': [3,
+                                                                        256,
+                                                                        256],
+                                                              'type': <FeatureType.VISUAL: 'VISUAL'>},
+                               'observation.images.camera2': {'shape': [3,
+                                                                        256,
+                                                                        256],
+                                                              'type': <FeatureType.VISUAL: 'VISUAL'>},
+                               'observation.images.camera3': {'shape': [3,
+                                                                        256,
+                                                                        256],
+                                                              'type': <FeatureType.VISUAL: 'VISUAL'>},
+                               'observation.state': {'shape': [6],
+                                                     'type': <FeatureType.STATE: 'STATE'>}},
+            'license': None,
+            'load_vlm_weights': True,
+            'max_action_dim': 32,
+            'max_period': 4.0,
+            'max_state_dim': 32,
+            'min_period': 0.004,
+            'n_action_steps': 50,
+            'n_obs_steps': 1,
+            'normalization_mapping': {'ACTION': <NormalizationMode.MEAN_STD: 'MEAN_STD'>,
+                                      'STATE': <NormalizationMode.MEAN_STD: 'MEAN_STD'>,
+                                      'VISUAL': <NormalizationMode.IDENTITY: 'IDENTITY'>},
+            'num_expert_layers': 0,
+            'num_steps': 10,
+            'num_vlm_layers': 16,
+            'optimizer_betas': [0.9, 0.95],
+            'optimizer_eps': 1e-08,
+            'optimizer_grad_clip_norm': 10.0,
+            'optimizer_lr': 0.0001,
+            'optimizer_weight_decay': 1e-10,
+            'output_features': {'action': {'shape': [6],
+                                           'type': <FeatureType.ACTION: 'ACTION'>}},
+            'pad_language_to': 'max_length',
+            'prefix_length': 0,
+            'pretrained_path': 'lerobot/smolvla_base',
+            'private': None,
+            'push_to_hub': True,
+            'repo_id': 'yjoshi5379/smolvla-trained-policy',
+            'resize_imgs_with_padding': [512, 512],
+            'rtc_config': None,
+            'scheduler_decay_lr': 2.5e-06,
+            'scheduler_decay_steps': 30000,
+            'scheduler_warmup_steps': 1000,
+            'self_attn_every_n_layers': 2,
+            'tags': None,
+            'tokenizer_max_length': 48,
+            'train_expert_only': True,
+            'train_state_proj': True,
+            'type': 'smolvla',
+            'use_amp': False,
+            'use_cache': True,
+            'use_delta_joint_actions_aloha': False,
+            'use_peft': False,
+            'vlm_model_name': 'HuggingFaceTB/SmolVLM2-500M-Video-Instruct'},
+ 'rabc_epsilon': 1e-06,
+ 'rabc_head_mode': 'sparse',
+ 'rabc_kappa': 0.01,
+ 'rabc_progress_path': None,
+ 'rename_map': {},
+ 'resume': False,
+ 'save_checkpoint': True,
+ 'save_freq': 2000,
+ 'scheduler': {'decay_lr': 2.5e-06,
+               'num_decay_steps': 30000,
+               'num_warmup_steps': 1000,
+               'peak_lr': 0.0001,
+               'type': 'cosine_decay_with_warmup'},
+ 'seed': 1000,
+ 'steps': 20000,
+ 'tolerance_s': 0.0001,
+ 'use_policy_training_preset': True,
+ 'use_rabc': False,
+ 'wandb': {'add_tags': True,
+           'disable_artifact': False,
+           'enable': True,
+           'entity': None,
+           'mode': None,
+           'notes': None,
+           'project': 'smolvla-cylinder-pick-and-place',
+           'run_id': None}}
+INFO 2026-04-15 23:32:53 db_utils.py:117 Logs will be synced with wandb.
+INFO 2026-04-15 23:32:53 db_utils.py:118 Track this run --> https://wandb.ai/yjoshi-university-college-london-ucl-/smolvla-cylinder-pick-and-place/runs/3iorrugd
+INFO 2026-04-15 23:32:53 ot_train.py:231 Creating dataset
+Traceback (most recent call last):
+  File "/scratch0/yjoshi/IXN-Project-Team-Extensify/lerobot/src/lerobot/datasets/dataset_metadata.py", line 110, in __init__
+    self._load_metadata()
+  File "/scratch0/yjoshi/IXN-Project-Team-Extensify/lerobot/src/lerobot/datasets/dataset_metadata.py", line 177, in _load_metadata
+    self.info = load_info(self.root)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "/scratch0/yjoshi/IXN-Project-Team-Extensify/lerobot/src/lerobot/datasets/io_utils.py", line 133, in load_info
+    info = load_json(local_dir / INFO_PATH)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/scratch0/yjoshi/IXN-Project-Team-Extensify/lerobot/src/lerobot/utils/io_utils.py", line 35, in load_json
+    with open(fpath) as f:
+         ^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/scratch0/yjoshi/lerobot_data/lerobot_home/yjoshi5379/cylinder-pick-place/meta/info.json'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/scratch0/yjoshi/miniconda3/envs/smolvla-gpu-train/bin/lerobot-train", line 6, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/scratch0/yjoshi/IXN-Project-Team-Extensify/lerobot/src/lerobot/scripts/lerobot_train.py", line 573, in main
+    train()
+  File "/scratch0/yjoshi/IXN-Project-Team-Extensify/lerobot/src/lerobot/configs/parser.py", line 233, in wrapper_inner
+    response = fn(cfg, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/scratch0/yjoshi/IXN-Project-Team-Extensify/lerobot/src/lerobot/scripts/lerobot_train.py", line 232, in train
+    dataset = make_dataset(cfg)
+              ^^^^^^^^^^^^^^^^^
+  File "/scratch0/yjoshi/IXN-Project-Team-Extensify/lerobot/src/lerobot/datasets/factory.py", line 82, in make_dataset
+    ds_meta = LeRobotDatasetMetadata(
+              ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/scratch0/yjoshi/IXN-Project-Team-Extensify/lerobot/src/lerobot/datasets/dataset_metadata.py", line 113, in __init__
+    self.revision = get_safe_version(self.repo_id, self.revision)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/scratch0/yjoshi/IXN-Project-Team-Extensify/lerobot/src/lerobot/datasets/utils.py", line 241, in get_safe_version
+    raise RevisionNotFoundError(
+          ^^^^^^^^^^^^^^^^^^^^^^
+TypeError: HfHubHTTPError.__init__() missing 1 required keyword-only argument: 'response'
+[DEBUG] HF_HOME set to: /scratch0/yjoshi/lerobot_data/huggingface_cache
+[DEBUG] HF_LEROBOT_HOME set to: /scratch0/yjoshi/lerobot_data/lerobot_home
+==================================================
+Launching LeRobot Training: training-run-1
+==================================================
+Dataset     : yjoshi5379/cylinder-pick-place
+Model       : lerobot/smolvla_base
+Output      : outputs/train/training-run-1
+Batch       : 32
+Steps       : 20000
+Checkpoints : Every 2000 steps
+==================================================
+
+
+LAUNCHING OFFLINE TRAINING ON BUMBLEBEE
+Data is stored in: /scratch0/yjoshi/lerobot_data/lerobot_home
+
+
+[ERROR] Training interrupted or failed with exit code 1.
