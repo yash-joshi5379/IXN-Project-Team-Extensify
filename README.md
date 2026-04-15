@@ -231,3 +231,213 @@ python src\remove_episode.py 66   # remove highest numbered episode first
 python src\remove_episode.py 17   # then lower ones
 python src\remove_episode.py 0    # and lowest numbered episode last
 ```
+
+## Setup for Accessing UCL Remote GPU Workstations
+In order to train our VLA models, we need GPUs for parallel processing and complex computations. For this, we can access remote workstations which have RTX 4070 Ti Super and RTX 4090 GPUs. Here is how to access these workstations:
+
+1. First we need to setup a VPN to access the UCL network. Enter the following URL into a web browser:
+```
+https://www.ucl.ac.uk/isd/services/get-connected/ucl-virtual-private-network-vpn
+```
+This webpage contains connection guides and clear instructions for installing the Cisco Anyconnect VPN onto Windows and MacOS devices. Linux installation is possible but not clearly documented on UCL's website, so check ```linux-vpn-install.md``` in this repo for a guide on installing the VPN on Linux devices.
+
+2. Once the VPN is installed, we can access the Remote Workstation Service. Enter the following URL into a web browser:
+```
+https://tsg.cs.ucl.ac.uk/remote-gpu-workstations/
+```
+
+3. Follow the instructions on the webpage to download the UCL CS Root CA certificate and add it to your web browser (Firefox/Chrome).
+
+4. Now activate your Cisco AnyConnect VPN, and then paste this URL: ```https://mydesk.cs.ucl.ac.uk/``` into your web browser. If you are not connected to the VPN at this stage, you will not be able to access this URL.
+
+5. Login to the UCL CS booking system using your UCL Computer Science account username and password **(NOT THE SAME AS YOUR UCL EMAIL AND PASSWORD)**. We got given these CS login details on the first day of our first year. If you cannot remember the details or have lost the details, visit this URL: ```https://tsg.cs.ucl.ac.uk/contact-us/```, and either visit Malet Place in UCL's Bloomsbury Campus or submit the CS Helpdesk Request (much easier).
+
+6. Once you have logged into the UCL CS booking system, you will see a schedule of all GPU workstations and their status (open, reserved, past .etc). You can hover over each workstation name (E.g. bumblebee.cs.ucl.ac.uk) to see which GPU it has.
+  
+7. To book a session, click on any open (white) cell for your chosen workstation. Give your reservation a title, and adapt the Begin and End times to when you want (maximum reservation time is 72 hours). Click the **Create** button to make the reservation, and you should see your reservation appear on the main schedule.
+
+8. Once your session time has started, you will need to use an SSH tunnel to access your remote GPU workstation.
+   
+   *Creating an SSH Tunnel on Linux/macOS*
+
+   1. First launch a new terminal on your local laptop/PC, and run the following ssh command, substituting the host name of the machine you booked, and your UCL CS username for $CS_USER. If asked for a password, enter your UCL CS password.
+   ```
+   ssh -L 8081:<host>.cs.ucl.ac.uk:8443 $CS_USER@knuckles.cs.ucl.ac.uk
+   ```
+  
+   *Creating an SSH Tunnel on Windows*
+
+   1. Launch **WSL** in a new terminal/PowerShell window by running ```wsl``` and then ```cd```. If you do not have WSL installed, simply install it by running ```wsl --install``` in a PowerShell window. Restart your machine after installing WSL to ensure all future terminals have WSL capabilities.
+  
+   2. Now in your **WSL** terminal, run the following ssh command, substituting the host name of the machine you booked, and your UCL CS username for $CS_USER
+   ```
+   ssh -L 8081:<host>.cs.ucl.ac.uk:8443 $CS_USER@knuckles.cs.ucl.ac.uk
+   ```
+
+      Note: If this doesn't work, open a new PowerShell window and run the same command, without using WSL. If ever asked for a password, enter your UCL CS password.
+
+**If your SSH Tunnel connection is successful, you should see comething like this:**
+```
+Last login: Mon Apr 13 23:48:58 2026 from 90.254.190.73
+>> This machine is running CentOS 7.9
+                                                   
+>> For all general enquiries, please contact the Helpdesk in 4.07, on
+   extn 37280 or e-mail 'request@cs.ucl.ac.uk'
+
+   This machines reboots on the first wednesday of each month
+>> Taught students must leave the building before midnight 
+
+** To see this message again type "cat /etc/motd"
+...
+```
+
+To double check the connection is successful, the terminal should look like ```$CS_USER@knuckles%```, with your CS username instead of $CS_USER. 
+To triple check, enter the command ```pwd``` and you should see the following output, with your UCL starting year instead of <year> and your CS username instead of $CS_USER :
+```
+$CS_USER@knuckles% pwd            # you enter pwd
+/cs/student/ug/<year>/$CS_USER    # you should see this with your starting year and CS username instead of <year> and $CS_USER       
+```
+
+**IMPORTANT: Keep this terminal window open (the successful SSH Tunnel connection), because this window is the bridge for the SSH connection. If the terminal window, closes, the connection will be lost.**
+
+9. Now that you have remotely connected to the remote GPU workstation via an SSH Tunnel, we can access this connection in VSCode. To do this, open VSCode and install the **Remote - SSH** extension.
+
+10. Open the Command Palette in VSCode by either clicking the Settings icon (bottom right corner of VSCode window) and clicking on the Command Palette option, or by using the keyboard shortcut ```Ctrl+Shift+P```. In the Command Palette, type in and select the option: **Remote-SSH: Open SSH Configuration File**, then select the option which looks like: **.../.ssh/config**. In this config file, enter the following, substituting your CS username instead of $CS_USER and the remote workstation name instead of <host> :
+```
+Host knuckles
+    HostName knuckles.cs.ucl.ac.uk
+    User $CS_USER
+
+Host ucl-gpu
+    HostName <host>.cs.ucl.ac.uk
+    User $CS_USER
+    ProxyJump knuckles
+```
+
+Then save and close this config file.
+
+11. In the bottom left corner of the VSCode window, you will see the symbol which looks like ```><``` (just under the settings icon). Click this symbol, click the **Connect to Host** option, then click the **ucl-gpu** option. A new VSCode window will appear, where you should enter your CS password in the text prompt area (you may need to enter it twice). After a few seconds, if you see **SSH: ucl-gpu** in the bottom right of the new VSCode window and no errors pop up, the connection is successful.
+
+12. To double check the connection, open a new terminal in the successfully connected VSCode window. You should see ```$CS_USER@<host>%``` in this terminal, with your CS username instead of $CS_USER and the workstation name instead of <host>. Then run the command ```nvidia-smi``` to ensure the GPU is working, and you should see smoething like the following:
+```
+$CS_USER@<host>% nvidia-smi    # you should see this starting bit in the terminal, and you should run the command 'nvidia smi'
+Tue Apr 14 00:36:46 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.126.09             Driver Version: 580.126.09     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 4070 ...    On  |   00000000:01:00.0 Off |                  N/A |
+|  0%   33C    P8             10W /  285W |      22MiB /  16376MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|    0   N/A  N/A           21752      G   /usr/libexec/Xorg                        11MiB |
++-----------------------------------------------------------------------------------------+
+```
+
+**This means we have successfully set up a remote connection to a GPU workstation in VSCode!!**
+
+## Setup for Model Training on a UCL Remote GPU Workstation
+The next step is to set up the code and environment on the remote workstation, in order to be able to remotely run a training script to run a VLA model.
+
+1. Ensure your remote connection is still intact by running ```pwd``` in a terminal. You should see ```/cs/student/ug/<year>/$CS_USER``` with your UCL starting year instead of ```<year>``` and your CS username instead of ```$CS_USER```.
+
+2. **IMPORTANT - When you reserve time on a remote GPU workstation, you will have scratch space on the machine’s disk in ```/scratch0/$USER/```. Anything in this scratch space will be removed when your sessions ends, so you must ensure that you upload all work on GitHub or download it to your local machine.**
+
+Hence, we will now navigate to the personal scratch space and do everything in this scratch space. To go to your scratch space, paste ```cd /scratch0/$USER``` into your terminal. Then run a ```pwd``` command to ensure you're now in your allocated scratch space.
+```
+$CS_USER@<host>% pwd                 # check current directory before moving to scratch space
+/cs/student/ug/<year>/$CS_USER       # you should see this with your starting year and CS username
+
+$CS_USER@<host>% cd /scratch0/$USER  # use this exact command move to your scratch space
+$CS_USER@<host>% pwd                 # now check current directory after moving to scratch space
+/scratch0/$CS_USER                   # you should see this with your CS username instead of $CS_USER
+```
+
+3. In your scratch space, clone your repository, navigate to the project root directory, and open this repo in a new VSCode window. In this new VSCode window, you should still see the blue **SSH: ucl-gpu** section in the bottom left corner of the window. 
+```
+$CS_USER@<host>% git clone <repo-url>
+$CS_USER@<host>% cd <repo-name>
+$CS_USER@<host>% code .
+```
+
+4. In this new VSCode window, open a new terminal, and run ```pwd``` to ensure you are in the project root directory: **/scratch0/$CS_USER/repo-name**. You should also see the full project repo structure in the VSCode file explorer on the left side of the VSCode window.
+
+5. Create a venv in the scratch space, by first installing a **standalone, portable Python binary**. We need to do this because the remote workstations only have Python 3.9.25, and we need Python >= 3.12 for this project. Hence, we shall install **Python 3.13.2** :
+    1. Navigate back to your personal scratch space by running this in the terminal: ```cd /scratch0/$USER```. Confirm you are in this directory by running ```pwd``` in the terminal.
+    
+    2. Launch bash by running ```bash``` in the terminal. Your terminal lines should now begin with ```bash-5.1$``` rather than ```$CS_USER@<host>%```.
+    
+    3. Install **pyenv** by running this command:
+    ```
+    curl https://pyenv.run | bash
+
+    # You should see this output:
+
+      % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+    100   270  100   270    0     0   2673      0 --:--:-- --:--:-- --:--:--  2673
+    Cloning into '/scratch0/yjoshi/.pyenv'...
+    remote: Enumerating objects: 1527, done.
+    ...  
+    ```
+
+    4. Then run the following 4 commands to add pyenv to the load PATH and to set the cache to scratch permanently.
+    ```
+    echo 'export PYENV_ROOT="/scratch0/$USER/.pyenv"' >> ~/.bashrc
+    echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
+    echo 'eval "$(pyenv init -)"' >> ~/.bashrc
+    echo 'export PIP_CACHE_DIR="/scratch0/$USER/.pip-cache"' >> ~/.bashrc
+    ```
+
+    5. Reload your bash by running this command: ```source ~/.bashrc```
+    
+    6. Intall Python 3.13.2 by running this command: ```pyenv install 3.13.2```
+    
+    7. Set Python 3.13.2 as the local Python version for this repository with these 2 commands:
+    ```
+    cd /scratch0/$USER/<repo-name>
+    pyenv local 3.13.2
+    ```
+
+    8. Verify that these steps worked by checking your Python version, by running ```python --version``` in your bash terminal, and the output should be ```Python 3.13.2```.
+
+6. If not already there, navigate to the project root directory: ```cd /scratch0/$USER/repo-name``` Now create the venv, activate the venv, and install all requirements, all in a bash terminal:
+```
+bash-5.1$ python -m venv .venv
+bash-5.1$ source .venv/bin/activate
+(.venv) bash-5.1$ pip install -r requirements.txt 
+```
+
+7. Finally follow **instructions 3-6 inclusive** from the first section **(Installation and Setup)**, to run the ```load_data_test.py``` file, clone the Lerobot repo, install its libraries, install the full version of OpenCV, and run the ```check_data.py``` file. Both of these files should run without any errors.
+
+
+## Training a VLA Model on a UCL Remote GPU Workstation
+Now that we have set up the venv and are able to run Python scripts on the remote workstation, we move on to training a VLA model.
+
+
+
+## Terminating Remote Workstation Connection
+
+1. Before your workstation session ends, save the files you want to keep by downloading them to your local machine, or by uploading them to a GitHub branch.
+
+2. Run these commands in VSCode to clear your personal scratch space:
+```
+cd                                        # go back to your home folder
+
+rm -rf /scratch0/$CS_USER/<repo-name>     # remove the repo in your scratch space
+
+cd /scratch0/$USER                        # after removing, go to your scratch space again
+ls -l                                     # check nothing is in your scratch space now
+total 0                                   # you should see this if nothing is left in your scratch space
+```
+
+2. Close the VSCode terminal, click on the blue **SSH: ucl-gpu** button in the bottom left corner, and choose the **Close Remote Connection** option. Finally, close VSCode, close the terminal window which acted as the SSH bridge between your local machine and the remote workstation, and disconnect from the Cisco VPN. 
