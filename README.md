@@ -467,6 +467,7 @@ cd lerobot
 pip install -e .
 pip uninstall opencv-python opencv-python-headless -y
 pip install opencv-python
+pip install 'lerobot[dataset]'
 cd ..
 ```
 
