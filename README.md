@@ -464,7 +464,9 @@ conda activate smolvla-gpu-train
 ```
 git clone https://github.com/huggingface/lerobot.git
 cd lerobot
-pip install -e .
+pip install -e ."[smolvla]"
+pip install torchcodec --index-url https://download.pytorch.org/whl/cu128
+conda install -c conda-forge av -y
 pip uninstall opencv-python opencv-python-headless -y
 pip install opencv-python
 pip install 'lerobot[dataset]'
