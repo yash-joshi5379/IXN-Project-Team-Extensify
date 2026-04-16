@@ -465,6 +465,8 @@ conda activate smolvla-gpu-train
 git clone https://github.com/huggingface/lerobot.git
 cd lerobot
 pip install -e .
+pip uninstall opencv-python opencv-python-headless -y
+pip install opencv-python
 cd ..
 ```
 
