@@ -89,7 +89,7 @@
             24726
         ]
     },
-    "observation.images.static": {
+    "observation.images.static_cam": {
         "min": [
             0.0,
             0.0,
@@ -114,7 +114,82 @@
             24726
         ]
     },
-    "observation.images.wrist": {
+    "observation.images.wrist_cam": {
+        "min": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "max": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "mean": [
+            0.5,
+            0.5,
+            0.5
+        ],
+        "std": [
+            0.225,
+            0.225,
+            0.225
+        ],
+        "count": [
+            24726
+        ]
+    },
+    "observation.images.camera1": {
+        "min": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "max": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "mean": [
+            0.5,
+            0.5,
+            0.5
+        ],
+        "std": [
+            0.225,
+            0.225,
+            0.225
+        ],
+        "count": [
+            24726
+        ]
+    },
+    "observation.images.camera2": {
+        "min": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "max": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "mean": [
+            0.5,
+            0.5,
+            0.5
+        ],
+        "std": [
+            0.225,
+            0.225,
+            0.225
+        ],
+        "count": [
+            24726
+        ]
+    },
+    "observation.images.camera3": {
         "min": [
             0.0,
             0.0,

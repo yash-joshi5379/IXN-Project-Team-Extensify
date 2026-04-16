@@ -1,6 +1,6 @@
 /scratch0/yjoshi/IXN-Project-Team-Extensify/lerobot/src/lerobot/policies/vqbet/vqbet_utils.py:1373: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
   @autocast(enabled=False)
-INFO 2026-04-15 23:32:51 ot_train.py:207 {'batch_size': 32,
+INFO 2026-04-16 04:47:49 ot_train.py:207 {'batch_size': 32,
  'checkpoint_path': None,
  'cudnn_deterministic': False,
  'dataset': {'episodes': None,
@@ -100,7 +100,7 @@ INFO 2026-04-15 23:32:51 ot_train.py:207 {'batch_size': 32,
                                            'type': <FeatureType.ACTION: 'ACTION'>}},
             'pad_language_to': 'max_length',
             'prefix_length': 0,
-            'pretrained_path': 'lerobot/smolvla_base',
+            'pretrained_path': '/scratch0/yjoshi/lerobot_data/smolvla_base_weights',
             'private': None,
             'push_to_hub': True,
             'repo_id': 'yjoshi5379/smolvla-trained-policy',
@@ -124,7 +124,9 @@ INFO 2026-04-15 23:32:51 ot_train.py:207 {'batch_size': 32,
  'rabc_head_mode': 'sparse',
  'rabc_kappa': 0.01,
  'rabc_progress_path': None,
- 'rename_map': {},
+ 'rename_map': {'observation.images.static_cam': "['observation.images.camera1', "
+                                                 "'observation.images.camera3']",
+                'observation.images.wrist_cam': 'observation.images.camera2'},
  'resume': False,
  'save_checkpoint': True,
  'save_freq': 2000,
@@ -146,24 +148,96 @@ INFO 2026-04-15 23:32:51 ot_train.py:207 {'batch_size': 32,
            'notes': None,
            'project': 'smolvla-cylinder-pick-and-place',
            'run_id': None}}
-INFO 2026-04-15 23:32:53 db_utils.py:117 Logs will be synced with wandb.
-INFO 2026-04-15 23:32:53 db_utils.py:118 Track this run --> https://wandb.ai/yjoshi-university-college-london-ucl-/smolvla-cylinder-pick-and-place/runs/3iorrugd
-INFO 2026-04-15 23:32:53 ot_train.py:231 Creating dataset
+INFO 2026-04-16 04:47:51 db_utils.py:117 Logs will be synced with wandb.
+INFO 2026-04-16 04:47:51 db_utils.py:118 Track this run --> https://wandb.ai/yjoshi-university-college-london-ucl-/smolvla-cylinder-pick-and-place/runs/guhvxfrn
+INFO 2026-04-16 04:47:51 ot_train.py:231 Creating dataset
+INFO 2026-04-16 04:47:51 eo_utils.py:110 Using video codec: libsvtav1
+Failed to read file '/scratch0/yjoshi/lerobot_data/lerobot_home/yjoshi5379/cylinder-pick-place/data/chunk-000/episode_000000.parquet' with error CastError: Couldn't cast
+action: list<element: float>
+  child 0, element: float
+observation.effort: list<element: float>
+  child 0, element: float
+observation.force_torque: list<element: float>
+  child 0, element: float
+observation.state: list<element: float>
+  child 0, element: float
+observation.qvel: list<element: float>
+  child 0, element: float
+timestamp: float
+frame_index: int64
+episode_index: int64
+index: int64
+task_index: int64
+next.done: bool
+task: string
+-- schema metadata --
+pandas: '{"index_columns": [], "column_indexes": [], "columns": [{"name":' + 1483
+to
+{'observation.state': List(Value('float32'), length=8), 'action': List(Value('float32'), length=8), 'observation.qvel': List(Value('float32'), length=8), 'observation.effort': List(Value('float32'), length=8), 'timestamp': Value('float32'), 'frame_index': Value('int64'), 'episode_index': Value('int64'), 'index': Value('int64'), 'task_index': Value('int64'), 'next.done': Value('bool'), 'observation.force_torque': List(Value('float32'), length=6)}
+because column names don't match
+ERROR 2026-04-16 04:47:51 /parquet.py:212 Failed to read file '/scratch0/yjoshi/lerobot_data/lerobot_home/yjoshi5379/cylinder-pick-place/data/chunk-000/episode_000000.parquet' with error CastError: Couldn't cast
+action: list<element: float>
+  child 0, element: float
+observation.effort: list<element: float>
+  child 0, element: float
+observation.force_torque: list<element: float>
+  child 0, element: float
+observation.state: list<element: float>
+  child 0, element: float
+observation.qvel: list<element: float>
+  child 0, element: float
+timestamp: float
+frame_index: int64
+episode_index: int64
+index: int64
+task_index: int64
+next.done: bool
+task: string
+-- schema metadata --
+pandas: '{"index_columns": [], "column_indexes": [], "columns": [{"name":' + 1483
+to
+{'observation.state': List(Value('float32'), length=8), 'action': List(Value('float32'), length=8), 'observation.qvel': List(Value('float32'), length=8), 'observation.effort': List(Value('float32'), length=8), 'timestamp': Value('float32'), 'frame_index': Value('int64'), 'episode_index': Value('int64'), 'index': Value('int64'), 'task_index': Value('int64'), 'next.done': Value('bool'), 'observation.force_torque': List(Value('float32'), length=6)}
+because column names don't match
 Traceback (most recent call last):
-  File "/scratch0/yjoshi/IXN-Project-Team-Extensify/lerobot/src/lerobot/datasets/dataset_metadata.py", line 110, in __init__
-    self._load_metadata()
-  File "/scratch0/yjoshi/IXN-Project-Team-Extensify/lerobot/src/lerobot/datasets/dataset_metadata.py", line 177, in _load_metadata
-    self.info = load_info(self.root)
-                ^^^^^^^^^^^^^^^^^^^^
-  File "/scratch0/yjoshi/IXN-Project-Team-Extensify/lerobot/src/lerobot/datasets/io_utils.py", line 133, in load_info
-    info = load_json(local_dir / INFO_PATH)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/scratch0/yjoshi/IXN-Project-Team-Extensify/lerobot/src/lerobot/utils/io_utils.py", line 35, in load_json
-    with open(fpath) as f:
-         ^^^^^^^^^^^
-FileNotFoundError: [Errno 2] No such file or directory: '/scratch0/yjoshi/lerobot_data/lerobot_home/yjoshi5379/cylinder-pick-place/meta/info.json'
+  File "/scratch0/yjoshi/miniconda3/envs/smolvla-gpu-train/lib/python3.12/site-packages/datasets/builder.py", line 1872, in _prepare_split_single
+    for key, table in generator:
+                      ^^^^^^^^^
+  File "/scratch0/yjoshi/miniconda3/envs/smolvla-gpu-train/lib/python3.12/site-packages/datasets/packaged_modules/parquet/parquet.py", line 209, in _generate_tables
+    yield Key(file_idx, batch_idx), self._cast_table(pa_table)
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/scratch0/yjoshi/miniconda3/envs/smolvla-gpu-train/lib/python3.12/site-packages/datasets/packaged_modules/parquet/parquet.py", line 147, in _cast_table
+    pa_table = table_cast(pa_table, self.info.features.arrow_schema)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/scratch0/yjoshi/miniconda3/envs/smolvla-gpu-train/lib/python3.12/site-packages/datasets/table.py", line 2272, in table_cast
+    return cast_table_to_schema(table, schema)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/scratch0/yjoshi/miniconda3/envs/smolvla-gpu-train/lib/python3.12/site-packages/datasets/table.py", line 2218, in cast_table_to_schema
+    raise CastError(
+datasets.table.CastError: Couldn't cast
+action: list<element: float>
+  child 0, element: float
+observation.effort: list<element: float>
+  child 0, element: float
+observation.force_torque: list<element: float>
+  child 0, element: float
+observation.state: list<element: float>
+  child 0, element: float
+observation.qvel: list<element: float>
+  child 0, element: float
+timestamp: float
+frame_index: int64
+episode_index: int64
+index: int64
+task_index: int64
+next.done: bool
+task: string
+-- schema metadata --
+pandas: '{"index_columns": [], "column_indexes": [], "columns": [{"name":' + 1483
+to
+{'observation.state': List(Value('float32'), length=8), 'action': List(Value('float32'), length=8), 'observation.qvel': List(Value('float32'), length=8), 'observation.effort': List(Value('float32'), length=8), 'timestamp': Value('float32'), 'frame_index': Value('int64'), 'episode_index': Value('int64'), 'index': Value('int64'), 'task_index': Value('int64'), 'next.done': Value('bool'), 'observation.force_torque': List(Value('float32'), length=6)}
+because column names don't match
 
-During handling of the above exception, another exception occurred:
+The above exception was the direct cause of the following exception:
 
 Traceback (most recent call last):
   File "/scratch0/yjoshi/miniconda3/envs/smolvla-gpu-train/bin/lerobot-train", line 6, in <module>
@@ -177,23 +251,41 @@ Traceback (most recent call last):
   File "/scratch0/yjoshi/IXN-Project-Team-Extensify/lerobot/src/lerobot/scripts/lerobot_train.py", line 232, in train
     dataset = make_dataset(cfg)
               ^^^^^^^^^^^^^^^^^
-  File "/scratch0/yjoshi/IXN-Project-Team-Extensify/lerobot/src/lerobot/datasets/factory.py", line 82, in make_dataset
-    ds_meta = LeRobotDatasetMetadata(
-              ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/scratch0/yjoshi/IXN-Project-Team-Extensify/lerobot/src/lerobot/datasets/dataset_metadata.py", line 113, in __init__
-    self.revision = get_safe_version(self.repo_id, self.revision)
-                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/scratch0/yjoshi/IXN-Project-Team-Extensify/lerobot/src/lerobot/datasets/utils.py", line 241, in get_safe_version
-    raise RevisionNotFoundError(
-          ^^^^^^^^^^^^^^^^^^^^^^
-TypeError: HfHubHTTPError.__init__() missing 1 required keyword-only argument: 'response'
-[DEBUG] HF_HOME set to: /scratch0/yjoshi/lerobot_data/huggingface_cache
-[DEBUG] HF_LEROBOT_HOME set to: /scratch0/yjoshi/lerobot_data/lerobot_home
+  File "/scratch0/yjoshi/IXN-Project-Team-Extensify/lerobot/src/lerobot/datasets/factory.py", line 87, in make_dataset
+    dataset = LeRobotDataset(
+              ^^^^^^^^^^^^^^^
+  File "/scratch0/yjoshi/IXN-Project-Team-Extensify/lerobot/src/lerobot/datasets/lerobot_dataset.py", line 231, in __init__
+    if force_cache_sync or not self.reader.try_load():
+                               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/scratch0/yjoshi/IXN-Project-Team-Extensify/lerobot/src/lerobot/datasets/dataset_reader.py", line 89, in try_load
+    self.hf_dataset = self._load_hf_dataset()
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/scratch0/yjoshi/IXN-Project-Team-Extensify/lerobot/src/lerobot/datasets/dataset_reader.py", line 128, in _load_hf_dataset
+    hf_dataset = load_nested_dataset(self.root / "data", features=features, episodes=self.episodes)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/scratch0/yjoshi/IXN-Project-Team-Extensify/lerobot/src/lerobot/datasets/io_utils.py", line 80, in load_nested_dataset
+    return Dataset.from_parquet([str(path) for path in paths], filters=filters, features=features)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/scratch0/yjoshi/miniconda3/envs/smolvla-gpu-train/lib/python3.12/site-packages/datasets/arrow_dataset.py", line 1583, in from_parquet
+    ).read()
+      ^^^^^^
+  File "/scratch0/yjoshi/miniconda3/envs/smolvla-gpu-train/lib/python3.12/site-packages/datasets/io/parquet.py", line 62, in read
+    self.builder.download_and_prepare(
+  File "/scratch0/yjoshi/miniconda3/envs/smolvla-gpu-train/lib/python3.12/site-packages/datasets/builder.py", line 884, in download_and_prepare
+    self._download_and_prepare(
+  File "/scratch0/yjoshi/miniconda3/envs/smolvla-gpu-train/lib/python3.12/site-packages/datasets/builder.py", line 947, in _download_and_prepare
+    self._prepare_split(split_generator, **prepare_split_kwargs)
+  File "/scratch0/yjoshi/miniconda3/envs/smolvla-gpu-train/lib/python3.12/site-packages/datasets/builder.py", line 1739, in _prepare_split
+    for job_id, done, content in self._prepare_split_single(
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/scratch0/yjoshi/miniconda3/envs/smolvla-gpu-train/lib/python3.12/site-packages/datasets/builder.py", line 1922, in _prepare_split_single
+    raise DatasetGenerationError("An error occurred while generating the dataset") from e
+datasets.exceptions.DatasetGenerationError: An error occurred while generating the dataset
 ==================================================
 Launching LeRobot Training: training-run-1
 ==================================================
 Dataset     : yjoshi5379/cylinder-pick-place
-Model       : lerobot/smolvla_base
+Model       : /scratch0/yjoshi/lerobot_data/smolvla_base_weights
 Output      : outputs/train/training-run-1
 Batch       : 32
 Steps       : 20000

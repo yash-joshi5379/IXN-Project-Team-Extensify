@@ -1,6 +1,6 @@
 # Core Paths
 DATASET_REPO_ID = "yjoshi5379/cylinder-pick-place" # Change to your HF username
-POLICY_PATH = "lerobot/smolvla_base"
+POLICY_PATH = "/scratch0/yjoshi/lerobot_data/smolvla_base_weights" # Points to where we upload the weights
 POLICY_REPO_ID = "yjoshi5379/smolvla-trained-policy"
 DEVICE = "cuda"
 
