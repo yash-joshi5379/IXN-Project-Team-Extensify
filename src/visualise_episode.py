@@ -16,7 +16,7 @@ if cache_dir.exists():
 subprocess.run([
     "lerobot-dataset-viz",
     "--repo-id", "local/cylinder-pick-place",
-    "--root", "dataset\\processed",
+    "--root", "dataset",
     "--mode", "local",
     "--episode-index", episode
 ])
