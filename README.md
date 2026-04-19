@@ -4,7 +4,7 @@ Repository to store all simulation and hardware-based code.
 
 Goal: create and train a SmolVLA model to automate a robot arm (XArm 7) with a 2-finger gripper to grasp a cylinder and place it into a slot.
 
-## Installation and Setup
+## 1. Installation and Setup
 1. Clone this repository and go into the project directory
 ```
 git clone https://github.com/yash-joshi5379/IXN-Project-Team-Extensify.git
@@ -14,45 +14,25 @@ cd IXN-Project-Team-Extensify/
 2. Create a virtual environment, activate it, and install all requirements
 ```
 python -m venv .venv
-.venv\Scripts\activate
+.venv\Scripts\activate      # This is for Windows, on Linux/macOS try: source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-3. Check the ```load_data_test.py``` file runs without errors. It should print the following output.
+3. Check the ```load_data_test.py``` file runs without errors by running ```python src/load_data_test.py```. It should print the following output.
 ```
-python src\load_data_test.py
+                                              action  ... next.done
+0  [0.013189731, 0.7745382, 0.0015100722, 2.57575...  ...     False
+1  [0.013216187, 0.77431756, 0.0014658261, 2.5753...  ...     False
+2  [0.01322409, 0.77423114, 0.0014516916, 2.57520...  ...     False
+3  [0.01282496, 0.7741936, 0.002053811, 2.5749416...  ...     False
+4  [0.013206642, 0.7740894, 0.0016700205, 2.57549...  ...     False
 
-                                              action  ... task_index
-0  [0.35293713, 0.68267363, -0.07424462, 2.556133...  ...          0
-1  [0.35295725, 0.6825197, -0.07424697, 2.5558503...  ...          0
-2  [0.35297787, 0.6823274, -0.074249804, 2.55549,...  ...          0
-3  [0.35299087, 0.6822012, -0.07425172, 2.5552552...  ...          0
-4  [0.35283133, 0.6822953, -0.07299664, 2.5529456...  ...          0
-
-[5 rows x 10 columns]
-['action', 'observation.effort', 'observation.force_torque', 'observation.state', 'observation.qvel', 'timestamp', 'frame_index', 'episode_index', 'index', 'task_index']
+[5 rows x 11 columns]
+['action', 'observation.effort', 'observation.force_torque', 'observation.state', 'observation.qvel', 'timestamp', 'frame_index', 'episode_index', 'index', 'task_index', 'next.done']
 action                       object
 observation.effort           object
 observation.force_torque     object
-observation.state            object
-observation.qvel             object
-timestamp                   float32
-frame_index                   int64
-episode_index                 int64
-index                         int64
-task_index                    int64
-dtype: object
-(600, 10)
-                                              action  ... task_index
-0  [0.35293713, 0.68267363, -0.07424462, 2.556133...  ...          0
-1  [0.35295725, 0.6825197, -0.07424697, 2.5558503...  ...          0
-
-[2 rows x 10 columns]
-action: shape=(8,), dtype=float32
-observation.state: shape=(8,), dtype=float32
-observation.effort: shape=(8,), dtype=float32
-observation.force_torque: shape=(6,), dtype=float32
-observation.qvel: shape=(8,), dtype=float32
+...
 ```
 
 4. While the venv is active, clone the LeRobot repository
@@ -60,7 +40,9 @@ observation.qvel: shape=(8,), dtype=float32
 git clone https://github.com/huggingface/lerobot.git
 cd lerobot
 pip install -e .
+git checkout v0.3.3
 cd ..
+pip install rerun-sdk==0.22.1 datasets==3.6.0
 ```
 Note: The -e means "editable," so if you change anything in the LeRobot folder, it updates automatically in your project.
 
@@ -68,18 +50,18 @@ Note: The ```pip install -e .``` command took around 10 mins on my laptop.
 
 5. Uninstall the "headless" version of OpenCV installed from when we installed lerobot, and install the GUI-enabled version:
 ```
-(.venv) ...\IXN-Project-Team-Extensify>pip uninstall opencv-python opencv-python-headless -y
+(.venv) ...\IXN-Project-Team-Extensify>pip uninstall opencv-python-headless -y
 (.venv) ...\IXN-Project-Team-Extensify>pip install opencv-python
 ```
 
-6. From the main project directory, run the ```check_data.py``` script  with ```EPISODE = episode_000000``` to check the installation works.
+6. From the main project directory, run the ```check_data.py``` script  with ```EPISODE = episode_000024``` to check the installation works.
 ```
 (.venv) ...\IXN-Project-Team-Extensify>python src\check_data.py
 ```
 
 It should print the following:
 ```
-Episode 0 has 494 rows of data
+episode_000024 has 529 rows of data
 Video frame dimensions (height, wdith, channels): (256, 256, 3)
 ```
 
@@ -89,7 +71,7 @@ Video frame dimensions (height, wdith, channels): (256, 256, 3)
 ```
 Note: This is for Windows, on Linux type ```sudo apt install -y ffmpeg``` and on Mac try ```brew install ffmpeg```
 
-8. After installing FFmpeg, close the terminal completely and open a new one, which allows the system to refresh and recognise the new software. In this new terminal, type ```ffmpeg -version```. You should see:
+8. After installing FFmpeg, close the terminal completely and open a new one, which allows the system to refresh and recognise the new software. In this new terminal, type ```ffmpeg -version```. You should see something like:
 ```
 ffmpeg version 8.1-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers
 built with gcc 15.2.0 (Rev11, Built by MSYS2 project)
@@ -190,11 +172,6 @@ Note: After running the command above, many things will be printed in the termin
 # Press the play button in the Rerun window once this reaches 100%
 ```
 
-Note: If you get this error: **`lerobot-dataset-viz` command not found:**, try this command:
-```
-python -m lerobot.scripts.lerobot_dataset_viz --repo-id local/cylinder-pick-place --root dataset\processed --mode local --episode-index 0
-```
-
 Note: If you get this error: **`ModuleNotFoundError: rerun`:**, try installing rerun again:
 ```
 (.venv) ...\IXN-Project-Team-Extensify> pip install rerun-sdk
@@ -202,9 +179,9 @@ Note: If you get this error: **`ModuleNotFoundError: rerun`:**, try installing r
 
 Note: If the Rerun window opens but shows no data, make sure you run the ```python src\visualise_episode.py 0``` command from the main project directory ```(.venv) ...\IXN-Project-Team-Extensify>```.
 
-3. Once you have the visualiser working, you can change the episode number. To do this, in the command above, change ```python src\visualise_episode.py 0``` to any number between 0 and 68. E.g.
+3. Once you have the visualiser working, you can change the episode number. To do this, in the command above, change ```python src\visualise_episode.py 0``` to any number between 0 and 65. E.g.
 ```
-python src\visualise_episode.py 47    # To visualise episode 47
+python src/visualise_episode.py 47    # To visualise episode 47
 ```
 
 4. For each episode, verify the following criteria:
@@ -345,81 +322,6 @@ Tue Apr 14 00:36:46 2026
 
 **This means we have successfully set up a remote connection to a GPU workstation in VSCode!!**
 
-## Setup for Model Training on a UCL Remote GPU Workstation
-The next step is to set up the code and environment on the remote workstation, in order to be able to remotely run a training script to run a VLA model.
-
-1. Ensure your remote connection is still intact by running ```pwd``` in a terminal. You should see ```/cs/student/ug/<year>/$CS_USER``` with your UCL starting year instead of ```<year>``` and your CS username instead of ```$CS_USER```.
-
-2. **IMPORTANT - When you reserve time on a remote GPU workstation, you will have scratch space on the machine’s disk in ```/scratch0/$USER/```. Anything in this scratch space will be removed when your sessions ends, so you must ensure that you upload all work on GitHub or download it to your local machine.**
-
-Hence, we will now navigate to the personal scratch space and do everything in this scratch space. To go to your scratch space, paste ```cd /scratch0/$USER``` into your terminal. Then run a ```pwd``` command to ensure you're now in your allocated scratch space.
-```
-$CS_USER@<host>% pwd                 # check current directory before moving to scratch space
-/cs/student/ug/<year>/$CS_USER       # you should see this with your starting year and CS username
-
-$CS_USER@<host>% cd /scratch0/$USER  # use this exact command move to your scratch space
-$CS_USER@<host>% pwd                 # now check current directory after moving to scratch space
-/scratch0/$CS_USER                   # you should see this with your CS username instead of $CS_USER
-```
-
-3. In your scratch space, clone your repository, navigate to the project root directory, and open this repo in a new VSCode window. In this new VSCode window, you should still see the blue **SSH: ucl-gpu** section in the bottom left corner of the window. 
-```
-$CS_USER@<host>% git clone <repo-url>
-$CS_USER@<host>% cd <repo-name>
-$CS_USER@<host>% code .
-```
-
-4. In this new VSCode window, open a new terminal, and run ```pwd``` to ensure you are in the project root directory: **/scratch0/$CS_USER/repo-name**. You should also see the full project repo structure in the VSCode file explorer on the left side of the VSCode window.
-
-5. Create a venv in the scratch space, by first installing a **standalone, portable Python binary**. We need to do this because the remote workstations only have Python 3.9.25, and we need Python >= 3.12 for this project. Hence, we shall install **Python 3.13.2** :
-    1. Navigate back to your personal scratch space by running this in the terminal: ```cd /scratch0/$USER```. Confirm you are in this directory by running ```pwd``` in the terminal.
-    
-    2. Launch bash by running ```bash``` in the terminal. Your terminal lines should now begin with ```bash-5.1$``` rather than ```$CS_USER@<host>%```.
-    
-    3. Install **pyenv** by running this command:
-    ```
-    curl https://pyenv.run | bash
-
-    # You should see this output:
-
-      % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-    100   270  100   270    0     0   2673      0 --:--:-- --:--:-- --:--:--  2673
-    Cloning into '/scratch0/yjoshi/.pyenv'...
-    remote: Enumerating objects: 1527, done.
-    ...  
-    ```
-
-    4. Then run the following 4 commands to add pyenv to the load PATH and to set the cache to scratch permanently.
-    ```
-    echo 'export PYENV_ROOT="/scratch0/$USER/.pyenv"' >> ~/.bashrc
-    echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
-    echo 'eval "$(pyenv init -)"' >> ~/.bashrc
-    echo 'export PIP_CACHE_DIR="/scratch0/$USER/.pip-cache"' >> ~/.bashrc
-    ```
-
-    5. Reload your bash by running this command: ```source ~/.bashrc```
-    
-    6. Intall Python 3.13.2 by running this command: ```pyenv install 3.13.2```
-    
-    7. Set Python 3.13.2 as the local Python version for this repository with these 2 commands:
-    ```
-    cd /scratch0/$USER/<repo-name>
-    pyenv local 3.13.2
-    ```
-
-    8. Verify that these steps worked by checking your Python version, by running ```python --version``` in your bash terminal, and the output should be ```Python 3.13.2```.
-
-6. If not already there, navigate to the project root directory: ```cd /scratch0/$USER/repo-name``` Now create the venv, activate the venv, and install all requirements, all in a bash terminal:
-```
-bash-5.1$ python -m venv .venv
-bash-5.1$ source .venv/bin/activate
-(.venv) bash-5.1$ pip install -r requirements.txt 
-```
-
-7. Finally follow **instructions 3-6 inclusive** from the first section **(Installation and Setup)**, to run the ```load_data_test.py``` file, clone the Lerobot repo, install its libraries, install the full version of OpenCV, and run the ```check_data.py``` file. Both of these files should run without any errors. You may need to install the Python extension on VSCode for the remote workstation.
-
-
 ## Training a VLA Model on a UCL Remote GPU Workstation
 Now that we have set up the venv and are able to run Python scripts on the remote workstation, we move on to training a VLA model. This stage requires some steps on your local machine and some steps on the remote workstation.
 
@@ -439,7 +341,7 @@ ModelInfo(id='openai-community/gpt2', author='openai-community', base_models=Non
 
 6. Run the command: ```python src/upload_to_hf.py``` in the terminal to upload the processed dataset to your personal Hugging Face account. To check the upload is successful, there should be no errors in the terminal, and you should see a dataset called ```cylinder-pick-place``` in your profile on the Hugging Face website.
 
-7. Run the command: ```python src/vla-train/download_smolvla_base_weights.py``` to download the SmolVLA base training weights to your local machine. Once downloaded, you should see a **smolvla_base_weights** folder appear in the file explorer, and it should be **grey**. 
+7. Run the command: ```python src/download_smolvla_base_weights.py``` to download the SmolVLA base training weights to your local machine. Once downloaded, you should see a **smolvla_base_weights** folder appear in the file explorer, and it should be **grey**. 
 
 ### Stage B - On Remote GPU Workstation
 1. Connect to your remote workstation host using VSCode. Check the instructions in the section **Setup for Accessing UCL Remote GPU Workstations** if you need help with any steps.
