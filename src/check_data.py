@@ -5,11 +5,11 @@ import cv2
 EPISODE = "episode_000024"
 
 # test if we can read episode data file
-df = pd.read_parquet(f"dataset/processed/data/chunk-000/{EPISODE}.parquet")
+df = pd.read_parquet(f"dataset/data/chunk-000/{EPISODE}.parquet")
 print(f"{EPISODE} has {len(df)} rows of data") # should be same number as your end frame index
 
 # test if we can see episode static video file
-cap = cv2.VideoCapture(f"dataset/processed/videos/chunk-000/observation.images.static_cam/{EPISODE}.mp4")
+cap = cv2.VideoCapture(f"dataset/videos/chunk-000/observation.images.static_cam/{EPISODE}.mp4")
 ret, frame = cap.read()     # gets first image frame from video
 if ret:
     print(f"Video frame dimensions (height, wdith, channels): {frame.shape}") # should be (256, 256, 3)
