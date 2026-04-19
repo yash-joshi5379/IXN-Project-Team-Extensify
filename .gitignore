@@ -1,3 +1,4 @@
 __pycache__/
 .venv/
 smolvla_base_weights/
+smolvla_output/
