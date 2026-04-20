@@ -369,7 +369,7 @@ cd lerobot
 pip install -e ."[smolvla]"
 pip install torchcodec --index-url https://download.pytorch.org/whl/cu128
 conda install -c conda-forge av -y
-pip uninstall opencv-python opencv-python-headless -y
+pip uninstall opencv-python-headless -y
 pip install opencv-python
 pip install 'lerobot[dataset]'
 cd ..
@@ -380,7 +380,7 @@ cd ..
 8. Switch back to your local machine in VSCode using the button under the settings icon. Then run the command below to copy the ```smolvla_base_weights``` which you installed to your local machine, to the remote workstation. In the command, substitute ```$CS_USER``` with your CS username, and substitute ```<host>``` with your remote workstation's name.
 On Windows:
 ```
-scp -r -J $CS_USER@knuckles.cs.ucl.ac.uk .\smolvla_base_weights\ $CS_USER@<host>.cs.ucl.ac.uk:/scratch0/$CS_USER/lerobot_data/
+scp -r -J $CS_USER@knuckles.cs.ucl.ac.uk .\smolvla_base_weights\ $CS_USER@<host>.cs.ucl.ac.uk:/scratch0/$CS_USER/IXN-Project-Team-Extensify/
 ```
 On Linux/macOS:
 ```
