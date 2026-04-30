@@ -1,0 +1,90 @@
+# ============================================================
+# xArm7 + G2 Gripper — SmolVLA Local Eval Config (Option A)
+# For use with: python uf_robot_eval.py --config xarm7_smolvla_eval_config.yaml
+#                                        --policy.path=<path_to_pretrained_model>
+# ============================================================
+
+RobotConfig:
+  _target_: lerobot.robots.ufactory_robot.config_uf_robot.UFRobotConfig
+
+  # --- Robot Connection ---
+  robot_ip: "192.168.1.127"       # !! CHANGE to your xArm7's actual IP address
+  robot_dof: 7                    # xArm7 has 7 DOF — required, do not leave as None
+  control_space: "joint"          # Your dataset action is 8D joint space (joints 1-7 + gripper)
+  gripper_control: true
+  gripper_type: 2                 # xArm Gripper G2 = type 2 (confirmed in uf_robot.py line 179)
+  gripper_port: null              # Only needed for Pika gripper (type 10)
+
+  # --- Joint Velocity Limits ---
+  max_joint_velocity: 30          # °/s — reduce to e.g. 45 for first runs for safety
+  max_linear_velocity: 100        # mm/s — unused in joint control mode, but required field
+
+  # --- Start Pose ---
+  # The robot will move to this joint configuration at the start of each episode reset.
+  # Set this to a safe, clear pose above your table/workspace.
+  # Values are in RADIANS. The defaults (0, 0, 0, π/2, 0, π/2, 0) may be fine,
+  # but adjust to match the starting pose used during your data collection.
+  start_joints: [0.0, 0.0, 0.0, 1.5707963, 0.0, 1.5707963, 0.0]
+  start_tcp_pose: null            # Leave null; joint-space start pose is used above
+
+  # --- rx_continuous ---
+  # Set to true if your wrist RX joint can cross the ±π boundary during the task.
+  # uf_robot_eval.py handles the angle wrapping automatically when this is true.
+  # For pick-and-place insertion tasks this is typically not needed.
+  rx_continuous: false
+
+  # --- Cameras ---
+  # Camera keys here MUST match the keys used during data collection.
+  # Your info.json confirms: "observation.images.static_cam" and "observation.images.wrist_cam"
+  # The robot reads these under the bare key (static_cam, wrist_cam) and the rename_map
+  # in DatasetRecordConfig below maps them to the observation.images.* prefix.
+  cameras:
+    static_cam:
+      _target_: lerobot.cameras.opencv.configuration_opencv.OpenCVCameraConfig
+      # !! CHANGE index_or_path to your static camera's device index or path
+      # Run: ls /dev/video* and try indices 0, 2, 4 to find which is which
+      index_or_path: 0
+      width: 256
+      height: 256
+      fps: 30
+    wrist_cam:
+      _target_: lerobot.cameras.opencv.configuration_opencv.OpenCVCameraConfig
+      # !! CHANGE index_or_path to your wrist camera's device index or path
+      index_or_path: 1
+      width: 256
+      height: 256
+      fps: 30
+
+  # --- Observation extras ---
+  observe_joint_vel: false        # Your dataset does not use observation.qvel in the policy input
+                                  # (qvel is recorded but SmolVLA was trained on observation.state only)
+
+
+DatasetRecordConfig:
+  repo_id: "local/xarm7_pick_place"   # !! CHANGE to your actual HuggingFace repo_id
+                                               # or a local identifier — must match what was
+                                               # used when creating the dataset
+  root: "C:/Users/yashj/projects/IXN-Project-Team-Extensify/dataset" # !! CHANGE to local path of your LeRobot dataset
+                                               #    e.g. "/home/user/datasets/xarm7_pick_place"
+  fps: 30                                      # Must match dataset fps (confirmed: 30 in info.json)
+  video: true                                  # Your dataset uses video encoding (av1)
+  num_image_writer_processes: 0
+  num_image_writer_threads_per_camera: 4
+  video_encoding_batch_size: 32
+
+  # --- rename_map: CRITICAL ---
+  # This maps the raw robot observation keys (produced by UFRobot.get_observation())
+  # to the feature keys your SmolVLA policy was trained on (from info.json).
+  #
+  # UFRobot.get_observation() in joint mode produces:
+  #   J1.pos, J2.pos, J3.pos, J4.pos, J5.pos, J6.pos, J7.pos  →  observation.state [0:7]
+  #   gripper.pos                                               →  observation.state [7]
+  #   static_cam  (np.ndarray image)                           →  observation.images.static_cam
+  #   wrist_cam   (np.ndarray image)                           →  observation.images.wrist_cam
+  #
+  # The rename_observations_processor in uf_robot_eval.py uses this map.
+  # Joint positions are aggregated into observation.state by the pipeline automatically.
+  # Camera images need explicit renaming from bare key → prefixed key.
+  rename_map:
+    static_cam: "observation.images.static_cam"
+    wrist_cam: "observation.images.wrist_cam"
