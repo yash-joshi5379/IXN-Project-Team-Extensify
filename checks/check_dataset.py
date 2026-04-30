@@ -3,12 +3,12 @@ Check 3: Loads dataset metadata and validates feature alignment.
 No hardware needed. Requires your local dataset path.
 """
 import sys
-sys.path.insert(0, "C:/Users/yashj/projects/IXN-Project-Team-Extensify/lerobot/src")
+sys.path.insert(0, "/home/er/IXN-Project-Team-Extensify/lerobot/src")
 
 from lerobot.datasets.lerobot_dataset import LeRobotDatasetMetadata
 
 DATASET_REPO_ID = "local/xarm7_pick_place"  # ← change this
-DATASET_ROOT    = "C:/Users/yashj/projects/IXN-Project-Team-Extensify/dataset"  # ← change this
+DATASET_ROOT    = "/home/er/IXN-Project-Team-Extensify/dataset"  # ← change this
 
 meta = LeRobotDatasetMetadata(repo_id=DATASET_REPO_ID, root=DATASET_ROOT)
 

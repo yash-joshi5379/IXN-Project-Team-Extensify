@@ -6,7 +6,7 @@ import sys
 import numpy as np
 
 # --- Adjust this path to your lerobot src ---
-sys.path.insert(0, "C:/Users/yashj/projects/IXN-Project-Team-Extensify/lerobot/src")
+sys.path.insert(0, "/home/er/IXN-Project-Team-Extensify/lerobot/src")
 
 from lerobot.robots.ufactory_robot.config_uf_robot import UFRobotConfig
 from lerobot.robots.ufactory_robot.uf_robot import UFRobot
