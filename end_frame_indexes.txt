@@ -1,4 +1,31 @@
 END_FRAMES = {
     "episode_00.hdf5": 0,           # Failed to pick it up first try
     "episode_01.hdf5": 420,
+
+    
+    "episode_46.hd5f": 544,
+    "episode_47.hd5f": 370,
+    "episode_48.hd5f": 456,
+    "episode_49.hd5f": 396,
+    "episode_50.hd5f": 0,  # very sudden movements towards the end 
+    "episode_51.hd5f": 347,
+    "episode_52.hd5f": 364,
+    "episode_53.hd5f": 414,
+    "episode_54.hd5f": 235,
+    "episode_55.hd5f": 300,
+    "episode_56.hd5f": 307,
+    "episode_57.hd5f": 346,
+    "episode_58.hd5f": 305,
+    "episode_59.hd5f": 482,
+    "episode_60.hd5f": 0,   #pushed the box too much for liking 
+    "episode_61.hd5f": 388, 
+    "episode_62.hd5f": 322, 
+    "episode_63.hd5f": 423, 
+    "episode_64.hd5f": 372, 
+    "episode_65.hd5f": 275, 
+    "episode_66.hd5f": 397, 
+    "episode_67.hd5f": 218, 
+    "episode_68.hd5f": 381, 
+    "episode_69.hd5f": 299, 
+
 }
