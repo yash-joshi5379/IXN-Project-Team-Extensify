@@ -1,0 +1,4 @@
+END_FRAMES = {
+    "episode_00.hdf5": 0,           # Failed to pick it up first try
+    "episode_01.hdf5": 420,
+}
