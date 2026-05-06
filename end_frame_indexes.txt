@@ -1,8 +1,32 @@
 END_FRAMES = {
     "episode_00.hdf5": 0,           # Failed to pick it up first try
     "episode_01.hdf5": 420,
-
-    
+    "episode_20.hdf5": 406,
+    "episode_21.hdf5": 455,         # Person walking in the background
+    "episode_22.hdf5": 390,
+    "episode_23.hdf5": 364,
+    "episode_24.hdf5": 500,
+    "episode_25.hdf5": 465,
+    "episode_26.hdf5": 440,
+    "episode_27.hdf5": 430,
+    "episode_28.hdf5": 319,
+    "episode_29.hdf5": 543,
+    "episode_30.hdf5": 279,         # Cylinder gets pushed by 1 finger during grasp
+    "episode_31.hdf5": 0,           # Bad grasp - gripper hits cube/slot
+    "episode_32.hdf5": 0,           # Bad grasp - failed the first attempt
+    "episode_33.hdf5": 0,           # Bad grasp - gripper moves the box 
+    "episode_34.hdf5": 336,
+    "episode_35.hdf5": 449,
+    "episode_36.hdf5": 343,
+    "episode_37.hdf5": 480,
+    "episode_38.hdf5": 318
+    "episode_39.hdf5": 0,           # Gripper pushes on the cube 
+    "episode_40.hdf5": 329,
+    "episode_41.hdf5": 372,
+    "episode_42.hdf5": 494,
+    "episode_43.hdf5": 599,
+    "episode_44.hdf5": 534,         # Cylinder gets pushed by 1 finger during grasp
+    "episode_45.hdf5": 309,         # Cylinder gets pushed by 1 finger during grasp
     "episode_46.hd5f": 544,
     "episode_47.hd5f": 370,
     "episode_48.hd5f": 456,
