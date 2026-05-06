@@ -3,4 +3,5 @@ __pycache__/
 smolvla_base_weights/
 smolvla_output/
 smolvla-model/
+aloha_dataset/
 act_output/
