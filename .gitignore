@@ -3,3 +3,4 @@ __pycache__/
 smolvla_base_weights/
 smolvla_output/
 smolvla-model/
+act_output/
