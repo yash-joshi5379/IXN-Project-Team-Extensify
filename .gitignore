@@ -6,4 +6,5 @@ smolvla-model/
 aloha_dataset/
 aloha_cleaned_dataset/
 processed_aloha_dataset/
+act_train_dataset/
 act_output/
