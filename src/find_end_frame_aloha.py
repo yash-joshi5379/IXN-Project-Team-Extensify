@@ -82,4 +82,4 @@ def visualize_compressed_aloha(file_path):
 
 
 # ONLY CHANGE THE FILE PATH, NOTHING ELSE
-visualize_compressed_aloha("aloha_dataset/episode_01.hdf5")
+visualize_compressed_aloha("processed_aloha_dataset/episode_45.hdf5")

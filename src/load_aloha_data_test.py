@@ -1,7 +1,7 @@
 import h5py
 
 # CHANGE THIS TO YOUR FILE PATH ON YOUR MACHINE
-file_path = "C:/Users/yashj/projects/IXN-Project-Team-Extensify/aloha_dataset/episode_05.hdf5"
+file_path = "C:/Users/yashj/projects/IXN-Project-Team-Extensify/processed_aloha_dataset/episode_05.hdf5"
 
 print(f"Inspecting: {file_path}")
 
