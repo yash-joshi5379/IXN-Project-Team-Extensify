@@ -1,9 +1,45 @@
 ----- End Frame Index / INVALID -----
-Episode_000000 - 599
-Episode_000001 - INVALID, pressed down on box
-Episode_000002 - 599
+Episode_000000 - 572
+Episode_000001 - 509
+Episode_000002 - 569
 Episode_000003 - 599
-Episode_000004 - INVALID, cylinder not in slot
+Episode_000004 - INVALID
+Episode_000005 - 599
+Episode_000006 - 390
+Episode_000007 - 510
+Episode_000008 - 510
+Episode_000009 - 450
+Episode_000010 - 450
+Episode_000011 - 450
+Episode_000012 - 420
+Episode_000013 - 450
+Episode_000014 - 420
+Episode_000015 - 420
+Episode_000016 - 390
+Episode_000017 - 480
+Episode_000018 - 360
+Episode_000019 - 390
+Episode_000020 - 360
+Episode_000021 - INVALID
+Episode_000022 - 360
+Episode_000023 - 450
+Episode_000024 - 330
+Episode_000025 - 450
+Episode_000026 - 480
+Episode_000027 - 420
+Episode_000028 - 510
+Episode_000029 - 450
+Episode_000030 - 390
+Episode_000031 - 420
+Episode_000032 - 420
+Episode_000033 - 419
+Episode_000034 - 450
+Episode_000035 - 329
+Episode_000036 - 450
+Episode_000037 - 360
+Episode_000038 - 360
+Episode_000039 - 540
+Episode_000040 - 450
 
 
 Episode_000091 - 443

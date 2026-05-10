@@ -4,4 +4,10 @@ smolvla_base_weights/
 smolvla_output/
 smolvla-model/
 act_output/
-dataset-v2
+dataset-v2/
+lerobot/
+dataset-v2-processed-lerobot/
+dataset-v2-processed-lerobot_old/
+dataset-v2-processed-lerobot_v30/
+rerun-output/
+*.rrd
