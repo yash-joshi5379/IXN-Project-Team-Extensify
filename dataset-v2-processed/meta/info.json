@@ -1,0 +1,171 @@
+{
+    "codebase_version": "v2.1",
+    "robot_type": "stationary",
+    "total_episodes": 39,
+    "total_frames": 17336,
+    "total_tasks": 1,
+    "total_videos": 78,
+    "total_chunks": 1,
+    "chunks_size": 1000,
+    "fps": 30,
+    "splits": {
+        "train": "0:39"
+    },
+    "data_path": "data/chunk-{episode_chunk:03d}/episode_{episode_index:06d}.parquet",
+    "video_path": "videos/chunk-{episode_chunk:03d}/{video_key}/episode_{episode_index:06d}.mp4",
+    "depth_images_path": null,
+    "features": {
+        "action": {
+            "dtype": "float32",
+            "shape": [
+                8
+            ],
+            "names": [
+                "action_0",
+                "action_1",
+                "action_2",
+                "action_3",
+                "action_4",
+                "action_5",
+                "action_6",
+                "action_7"
+            ]
+        },
+        "observation.effort": {
+            "dtype": "float32",
+            "shape": [
+                8
+            ],
+            "names": [
+                "effort_0",
+                "effort_1",
+                "effort_2",
+                "effort_3",
+                "effort_4",
+                "effort_5",
+                "effort_6",
+                "effort_7"
+            ]
+        },
+        "observation.state": {
+            "dtype": "float32",
+            "shape": [
+                8
+            ],
+            "names": [
+                "qpos_0",
+                "qpos_1",
+                "qpos_2",
+                "qpos_3",
+                "qpos_4",
+                "qpos_5",
+                "qpos_6",
+                "qpos_7"
+            ]
+        },
+        "observation.qvel": {
+            "dtype": "float32",
+            "shape": [
+                8
+            ],
+            "names": [
+                "qvel_0",
+                "qvel_1",
+                "qvel_2",
+                "qvel_3",
+                "qvel_4",
+                "qvel_5",
+                "qvel_6",
+                "qvel_7"
+            ]
+        },
+        "observation.images.0_femtobolt": {
+            "dtype": "video",
+            "shape": [
+                256,
+                256,
+                3
+            ],
+            "names": [
+                "height",
+                "width",
+                "channels"
+            ],
+            "info": {
+                "video.height": 256,
+                "video.width": 256,
+                "video.codec": "h264",
+                "video.pix_fmt": "yuv420p",
+                "video.is_depth_map": false,
+                "video.fps": 30,
+                "video.channels": 3,
+                "has_audio": false
+            }
+        },
+        "observation.images.1_gemini330": {
+            "dtype": "video",
+            "shape": [
+                256,
+                256,
+                3
+            ],
+            "names": [
+                "height",
+                "width",
+                "channels"
+            ],
+            "info": {
+                "video.height": 256,
+                "video.width": 256,
+                "video.codec": "h264",
+                "video.pix_fmt": "yuv420p",
+                "video.is_depth_map": false,
+                "video.fps": 30,
+                "video.channels": 3,
+                "has_audio": false
+            }
+        },
+        "timestamp": {
+            "dtype": "float32",
+            "shape": [
+                1
+            ],
+            "names": null
+        },
+        "frame_index": {
+            "dtype": "int64",
+            "shape": [
+                1
+            ],
+            "names": null
+        },
+        "episode_index": {
+            "dtype": "int64",
+            "shape": [
+                1
+            ],
+            "names": null
+        },
+        "index": {
+            "dtype": "int64",
+            "shape": [
+                1
+            ],
+            "names": null
+        },
+        "task_index": {
+            "dtype": "int64",
+            "shape": [
+                1
+            ],
+            "names": null
+        },
+        "next.done": {
+            "dtype": "bool",
+            "shape": [
+                1
+            ],
+            "names": null
+        }
+    }
+}
