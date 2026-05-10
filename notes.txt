@@ -4,3 +4,61 @@ Episode_000001 - INVALID, pressed down on box
 Episode_000002 - 599
 Episode_000003 - 599
 Episode_000004 - INVALID, cylinder not in slot
+
+
+Episode_000091 - 443
+Episode_000092 - 403
+Episode_000093 - 453
+Episode_000094 - 386
+Episode_000095 - 422
+Episode_000096 - 396
+Episode_000097 - 378
+Episode_000098 - INVALID, cylinder clips onto side of box weirdly before falling into hole
+Episode_000099 - 475
+Episode_000100 - 572
+Episode_000101 - 524
+Episode_000102 - 445
+Episode_000103 - 455
+Episode_000104 - 404
+Episode_000105 - INVALID, cylinder clips onto side of box weirdly before falling into hole
+Episode_000106 - INVALID, cylinder tugs on target box causing whole box to shift
+Episode_000107 - 448
+Episode_000108 - 358
+Episode_000109 - 377
+Episode_000110 - 437
+Episode_000111 - 525
+Episode_000112 - 521
+Episode_000113 - INVALID, red cylinder was moved before grasping
+Episode_000114 - 490
+Episode_000115 - 407
+Episode_000116 - 349
+Episode_000117 - 446
+Episode_000118 - INVALID, cylinder tugs on target box causing whole box to shift
+Episode_000119 - 361 
+Episode_000120 - 383
+Episode_000121 - 366
+Episode_000122 - 327
+Episode_000123 - 447
+Episode_000124 - 365
+Episode_000125 - 377
+Episode_000126 - 410
+Episode_000127 - 391
+Episode_000128 - 443
+Episode_000129 - 396
+Episode_000130 - INVALID, someone walks through the video
+Episode_000131 - 421
+Episode_000132 - 478
+Episode_000133 - 466
+Episode_000134 - 458
+Episode_000135 - 457
+Episode_000136 - INVALID, cylinder clips onto side of box weirdly before falling into hole
+Episode_000137 - INVALID, cylinder tugs on target box causing whole box to shift
+Episode_000138 - 458
+Episode_000139 - 452
+Episode_000140 - 320
+Episode_000141 - INVALID, someone walks through the video
+Episode_000142 - 390
+Episode_000143 - 382
+Episode_000144 - 415
+Episode_000145 - 332
+Episode_000146 - 365
