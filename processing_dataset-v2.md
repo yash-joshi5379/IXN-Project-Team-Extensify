@@ -71,7 +71,9 @@ Note: The ```pip install -e .``` command took around 10 mins on my laptop.
 
 7. For your episode *i*, run this command from the project root directory: ```python src/find_end_frame.py i ```. You should see a window with both camera views. Use **SPACE** to start/stop the videos, **f** to step forward 1 frame and **b** to step back 1 frame. Once you have found the end frame index, press **q**.
 
-8. Open ```notes.txt``` and add your episode number *i*, with either the end frame index, or INVALID. 
+**IMPORTANT: For this dataset, the task ends when the arm goes up after it drops the cylinder in the slot. At the end frame index, you should see both the cylinder's end position and the cylinder's starting position in the gemini330 camera view.**
+
+9. Open ```notes.txt``` and add your episode number *i*, with either the end frame index, or INVALID. 
 **An episode is invalid if:**
 - the video ends but the cylinder is not yet in the slot
 - someone walks through the video
