@@ -69,7 +69,7 @@ Note: The ```pip install -e .``` command took around 10 mins on my laptop.
 (.venv) ...\IXN-Project-Team-Extensify>pip install opencv-python
 ```
 
-7. For your episode *i*, run this command from the project root directory: ```python src/find_end_frame.py *i* ```. You should see a window with both camera views. Use **SPACE** to start/stop the videos, **f** to step forward 1 frame and **b** to step back 1 frame. Once you have found the end frame index, press **q**.
+7. For your episode *i*, run this command from the project root directory: ```python src/find_end_frame.py i ```. You should see a window with both camera views. Use **SPACE** to start/stop the videos, **f** to step forward 1 frame and **b** to step back 1 frame. Once you have found the end frame index, press **q**.
 
 8. Open ```notes.txt``` and add your episode number *i*, with either the end frame index, or INVALID. 
 **An episode is invalid if:**
