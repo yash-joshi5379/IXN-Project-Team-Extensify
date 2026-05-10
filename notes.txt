@@ -40,45 +40,45 @@ Episode_000037 - 360
 Episode_000038 - 360
 Episode_000039 - 540
 Episode_000040 - 450
-Episode_000041 - 
-Episode_000042 - 
-Episode_000043 - 
-Episode_000044 - 
-Episode_000045 - 
-Episode_000046 - 
-Episode_000047 - 
-Episode_000048 - 
-Episode_000049 - 
-Episode_000050 - 
-Episode_000051 - 
-Episode_000052 - 
-Episode_000053 - 
-Episode_000054 - 
-Episode_000055 - 
-Episode_000056 - 
-Episode_000057 - 
-Episode_000058 - 
-Episode_000059 - 
-Episode_000060 - 
-Episode_000061 - 
-Episode_000062 - 
-Episode_000063 - 
-Episode_000064 - 
-Episode_000065 - 
-Episode_000066 - 
-Episode_000067 - 
-Episode_000068 - 
-Episode_000069 - 
-Episode_000070 - 
-Episode_000071 - 
-Episode_000072 - 
-Episode_000073 - 
-Episode_000074 - 
-Episode_000075 - 
-Episode_000076 - 
-Episode_000077 - 
-Episode_000078 - 
-Episode_000079 - 
+Episode_000041 - 446
+Episode_000042 - 335
+Episode_000043 - 590
+Episode_000044 - 567
+Episode_000045 - 532
+Episode_000046 - 566
+Episode_000047 - 420
+Episode_000048 - 468
+Episode_000049 - INVALID, arm vibrates too much as it moves 
+Episode_000050 - 534
+Episode_000051 - 515
+Episode_000052 - INVALID, box gets pushed down twice 
+Episode_000053 - 500 
+Episode_000054 - INVALID, cylinder wobbles ALOT at the beginning of the clip 
+Episode_000055 - INVALID, cylinder wobbles ALOT at the beginning of the clip 
+Episode_000056 - 321
+Episode_000057 - 563
+Episode_000058 - INVALID, cylinder pushes down on box 
+Episode_000059 - INVALID, cylinder pushes on box and also falls in wierdly 
+Episode_000060 - 398 
+Episode_000061 - INVALID, cylinder moved the box 
+Episode_000062 - 517
+Episode_000063 - 463
+Episode_000064 - INVALID, gripper slid the cylinder into the hole
+Episode_000065 - 387
+Episode_000066 - INVALID, gripper pushed the cylinder and box 
+Episode_000067 - 381
+Episode_000068 - 487
+Episode_000069 - 431
+Episode_000070 - 436
+Episode_000071 - 423
+Episode_000072 - INVALID, black ring goes over the black lines
+Episode_000073 - INVALID, gripper pushes box and slides cylinder in 
+Episode_000074 - 403
+Episode_000075 - INVALID, gripper moved the box 
+Episode_000076 - 467
+Episode_000077 - 425
+Episode_000078 - 438
+Episode_000079 - 452
 Episode_000080 - 390
 Episode_000081 - 422
 Episode_000082 - INVALID, starting frame moved out of black tape box, the colour is the same so might cause issues with the overlap
