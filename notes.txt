@@ -108,3 +108,43 @@ Episode 40: Arm takes a long time to reach initial object
 Episode 41: Arm starts very far from object so takes longer to reach
             initial object
 
+## Dataset-v2 Section 2 Validation
+Episode_000000 - valid
+Episode_000001 - valid
+Episode_000002 - valid
+Episode_000003 - valid
+Episode_000004 - valid
+Episode_000005 - valid
+Episode_000006 - valid
+Episode_000007 - valid
+Episode_000008 - valid
+Episode_000009 - valid
+Episode_000010 - valid
+Episode_000011 - valid
+Episode_000012 - valid
+Episode_000013 - valid
+Episode_000014 - valid
+Episode_000015 - valid
+Episode_000016 - valid
+Episode_000017 - valid
+Episode_000018 - valid
+Episode_000019 - valid
+Episode_000020 - valid
+Episode_000021 - valid
+Episode_000022 - valid
+Episode_000023 - valid
+Episode_000024 - valid
+Episode_000025 - valid
+Episode_000026 - valid
+Episode_000027 - valid
+Episode_000028 - valid
+Episode_000029 - valid
+Episode_000030 - valid
+Episode_000031 - valid
+Episode_000032 - valid
+Episode_000033 - valid
+Episode_000034 - valid
+Episode_000035 - valid
+Episode_000036 - valid
+Episode_000037 - valid
+Episode_000038 - valid
