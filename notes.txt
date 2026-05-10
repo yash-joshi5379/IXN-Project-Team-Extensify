@@ -40,8 +40,56 @@ Episode_000037 - 360
 Episode_000038 - 360
 Episode_000039 - 540
 Episode_000040 - 450
-
-
+Episode_000041 - 
+Episode_000042 - 
+Episode_000043 - 
+Episode_000044 - 
+Episode_000045 - 
+Episode_000046 - 
+Episode_000047 - 
+Episode_000048 - 
+Episode_000049 - 
+Episode_000050 - 
+Episode_000051 - 
+Episode_000052 - 
+Episode_000053 - 
+Episode_000054 - 
+Episode_000055 - 
+Episode_000056 - 
+Episode_000057 - 
+Episode_000058 - 
+Episode_000059 - 
+Episode_000060 - 
+Episode_000061 - 
+Episode_000062 - 
+Episode_000063 - 
+Episode_000064 - 
+Episode_000065 - 
+Episode_000066 - 
+Episode_000067 - 
+Episode_000068 - 
+Episode_000069 - 
+Episode_000070 - 
+Episode_000071 - 
+Episode_000072 - 
+Episode_000073 - 
+Episode_000074 - 
+Episode_000075 - 
+Episode_000076 - 
+Episode_000077 - 
+Episode_000078 - 
+Episode_000079 - 
+Episode_000080 - 390
+Episode_000081 - 422
+Episode_000082 - INVALID, starting frame moved out of black tape box, the colour is the same so might cause issues with the overlap
+Episode_000083 - 413
+Episode_000084 - INVALID, cylinder tugs on target box causing whole box to shift
+Episode_000085 - 413
+Episode_000086 - 538
+Episode_000087 - 399
+Episode_000088 - INVALID, cylinder tugs on target box causing whole box to shift
+Episode_000089 - 435
+Episode_000090 - 419
 Episode_000091 - 443
 Episode_000092 - 403
 Episode_000093 - 453
