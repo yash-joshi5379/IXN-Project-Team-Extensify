@@ -26,7 +26,7 @@ import numpy as np
 # CONFIG
 # ─────────────────────────────────────────────────────────────────────────────
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_DATASET = PROJECT_ROOT / "dataset-v2"
+DEFAULT_DATASET = PROJECT_ROOT / "dataset-v2-raw"
 
 # Camera subfolder names inside videos/chunk-000/
 CAMERA_KEYS = [

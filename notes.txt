@@ -1,4 +1,3 @@
------ End Frame Index / INVALID -----
 Episode_000000 - 572
 Episode_000001 - 509
 Episode_000002 - 569
@@ -48,46 +47,46 @@ Episode_000045 - 532
 Episode_000046 - 566
 Episode_000047 - 420
 Episode_000048 - 468
-Episode_000049 - INVALID, arm vibrates too much as it moves 
+Episode_000049 - INVALID 
 Episode_000050 - 534
 Episode_000051 - 515
-Episode_000052 - INVALID, box gets pushed down twice 
+Episode_000052 - INVALID 
 Episode_000053 - 500 
-Episode_000054 - INVALID, cylinder wobbles ALOT at the beginning of the clip 
-Episode_000055 - INVALID, cylinder wobbles ALOT at the beginning of the clip 
+Episode_000054 - INVALID 
+Episode_000055 - INVALID 
 Episode_000056 - 321
 Episode_000057 - 563
-Episode_000058 - INVALID, cylinder pushes down on box 
-Episode_000059 - INVALID, cylinder pushes on box and also falls in wierdly 
+Episode_000058 - INVALID
+Episode_000059 - INVALID
 Episode_000060 - 398 
-Episode_000061 - INVALID, cylinder moved the box 
+Episode_000061 - INVALID
 Episode_000062 - 517
 Episode_000063 - 463
-Episode_000064 - INVALID, gripper slid the cylinder into the hole
+Episode_000064 - INVALID
 Episode_000065 - 387
-Episode_000066 - INVALID, gripper pushed the cylinder and box 
+Episode_000066 - INVALID 
 Episode_000067 - 381
 Episode_000068 - 487
 Episode_000069 - 431
 Episode_000070 - 436
 Episode_000071 - 423
-Episode_000072 - INVALID, black ring goes over the black lines
-Episode_000073 - INVALID, gripper pushes box and slides cylinder in 
+Episode_000072 - INVALID
+Episode_000073 - INVALID
 Episode_000074 - 403
-Episode_000075 - INVALID, gripper moved the box 
+Episode_000075 - INVALID
 Episode_000076 - 467
 Episode_000077 - 425
 Episode_000078 - 438
 Episode_000079 - 452
 Episode_000080 - 390
 Episode_000081 - 422
-Episode_000082 - INVALID, starting frame moved out of black tape box, the colour is the same so might cause issues with the overlap
+Episode_000082 - INVALID
 Episode_000083 - 413
-Episode_000084 - INVALID, cylinder tugs on target box causing whole box to shift
+Episode_000084 - INVALID
 Episode_000085 - 413
 Episode_000086 - 538
 Episode_000087 - 399
-Episode_000088 - INVALID, cylinder tugs on target box causing whole box to shift
+Episode_000088 - INVALID
 Episode_000089 - 435
 Episode_000090 - 419
 Episode_000091 - 443
@@ -97,27 +96,27 @@ Episode_000094 - 386
 Episode_000095 - 422
 Episode_000096 - 396
 Episode_000097 - 378
-Episode_000098 - INVALID, cylinder clips onto side of box weirdly before falling into hole
+Episode_000098 - INVALID
 Episode_000099 - 475
 Episode_000100 - 572
 Episode_000101 - 524
 Episode_000102 - 445
 Episode_000103 - 455
 Episode_000104 - 404
-Episode_000105 - INVALID, cylinder clips onto side of box weirdly before falling into hole
-Episode_000106 - INVALID, cylinder tugs on target box causing whole box to shift
+Episode_000105 - INVALID
+Episode_000106 - INVALID
 Episode_000107 - 448
 Episode_000108 - 358
 Episode_000109 - 377
 Episode_000110 - 437
 Episode_000111 - 525
 Episode_000112 - 521
-Episode_000113 - INVALID, red cylinder was moved before grasping
+Episode_000113 - INVALID
 Episode_000114 - 490
 Episode_000115 - 407
 Episode_000116 - 349
 Episode_000117 - 446
-Episode_000118 - INVALID, cylinder tugs on target box causing whole box to shift
+Episode_000118 - INVALID
 Episode_000119 - 361 
 Episode_000120 - 383
 Episode_000121 - 366
@@ -129,18 +128,18 @@ Episode_000126 - 410
 Episode_000127 - 391
 Episode_000128 - 443
 Episode_000129 - 396
-Episode_000130 - INVALID, someone walks through the video
+Episode_000130 - INVALID
 Episode_000131 - 421
 Episode_000132 - 478
 Episode_000133 - 466
 Episode_000134 - 458
 Episode_000135 - 457
-Episode_000136 - INVALID, cylinder clips onto side of box weirdly before falling into hole
-Episode_000137 - INVALID, cylinder tugs on target box causing whole box to shift
+Episode_000136 - INVALID
+Episode_000137 - INVALID
 Episode_000138 - 458
 Episode_000139 - 452
 Episode_000140 - 320
-Episode_000141 - INVALID, someone walks through the video
+Episode_000141 - INVALID
 Episode_000142 - 390
 Episode_000143 - 382
 Episode_000144 - 415
