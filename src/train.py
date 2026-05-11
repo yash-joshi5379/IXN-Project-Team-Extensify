@@ -19,32 +19,32 @@ from pathlib import Path
 # ═══════════════════════════════════════════════════════════════════════════════
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
-PROJECT_ROOT  = Path("/root/IXN-Project-Team-Extensify")
-DATASET_ROOT  = PROJECT_ROOT / "dataset"
+PROJECT_ROOT  = Path("/scratch0/yjoshi/IXN-Project-Team-Extensify")
+DATASET_ROOT  = PROJECT_ROOT / "dataset-v2"
 WEIGHTS_PATH  = PROJECT_ROOT / "smolvla_base_weights"
-LEROBOT_DIR   = PROJECT_ROOT / "lerobot"
-OUTPUT_DIR    = PROJECT_ROOT / "smolvla_output"
+LEROBOT_DIR   = PROJECT_ROOT / "lerobot/src/lerobot"
+OUTPUT_DIR    = PROJECT_ROOT / "smolvla_v2_output"
 
 # ── Dataset ───────────────────────────────────────────────────────────────────
 # "local/" prefix tells lerobot-train to load from DATASET_ROOT on disk
 # instead of downloading from HuggingFace Hub.
-DATASET_REPO_ID = "local/xarm7_insert"
-POLICY_REPO_ID = "local/smolvla-trained-policy"
+DATASET_REPO_ID = "local/cylinder_v2"
+POLICY_REPO_ID = "local/smolvla-v2-trained-policy"
 
 # ── Training hyperparameters ──────────────────────────────────────────────────
-STEPS          = 20000
+STEPS          = 30000
 BATCH_SIZE     = 64      # reduce to 16 if OOM; try 64 if VRAM allows
 LEARNING_RATE  = 1e-4
-WARMUP_STEPS   = 500     # LR warmup — ~2.5% of total steps is a safe default
+WARMUP_STEPS   = 1000     # LR warmup — ~2.5% of total steps is a safe default
 USE_AMP        = False    # mixed precision: faster + less VRAM (recommended)
 NUM_WORKERS    = 4       # dataloader workers; reduce if CPU is a bottleneck
 
 # ── Checkpointing ─────────────────────────────────────────────────────────────
-SAVE_FREQ      = 2000    # save a checkpoint every N steps
+SAVE_FREQ      = 6000    # save a checkpoint every N steps
 
 # ── WandB ─────────────────────────────────────────────────────────────────────
 WANDB_ENABLE   = True
-WANDB_PROJECT  = "smolvla_xarm7_insert"
+WANDB_PROJECT  = "smolvla_v2"
 
 # ── Cache dirs to clear before each run ───────────────────────────────────────
 # Removes stale HuggingFace/lerobot caches that can cause dataset loading
