@@ -13,6 +13,35 @@ import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
+import os
+
+env = os.environ.copy()
+env.update({
+    # HuggingFace hub + datasets cache
+    "HF_HOME":              "/scratch0/yjoshi/.cache/huggingface",
+    "HF_DATASETS_CACHE":    "/scratch0/yjoshi/.cache/huggingface/datasets",
+    "HUGGINGFACE_HUB_CACHE":"/scratch0/yjoshi/.cache/huggingface/hub",
+    # Torch compile / triton cache
+    "TORCH_HOME":           "/scratch0/yjoshi/.cache/torch",
+    "TRITON_CACHE_DIR":     "/scratch0/yjoshi/.cache/triton",
+    # WandB
+    "WANDB_DIR":            "/scratch0/yjoshi/wandb",
+    "WANDB_CACHE_DIR":      "/scratch0/yjoshi/.cache/wandb",
+})
+
+# Create them so nothing complains
+SCRATCH_CACHE_KEYS = [
+    "HF_HOME",
+    "HF_DATASETS_CACHE",
+    "HUGGINGFACE_HUB_CACHE",
+    "TORCH_HOME",
+    "TRITON_CACHE_DIR",
+    "WANDB_DIR",
+    "WANDB_CACHE_DIR",
+]
+
+for key in SCRATCH_CACHE_KEYS:
+    Path(env[key]).mkdir(parents=True, exist_ok=True)
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # CONFIG — edit these between runs to track different hyperparameter choices
@@ -20,16 +49,16 @@ from pathlib import Path
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 PROJECT_ROOT  = Path("/scratch0/yjoshi/IXN-Project-Team-Extensify")
-DATASET_ROOT  = PROJECT_ROOT / "dataset-v2"
+DATASET_ROOT  = PROJECT_ROOT / "dataset-v2-pro"
 WEIGHTS_PATH  = PROJECT_ROOT / "smolvla_base_weights"
 LEROBOT_DIR   = PROJECT_ROOT / "lerobot/src/lerobot"
-OUTPUT_DIR    = PROJECT_ROOT / "smolvla_v2_output"
+OUTPUT_DIR    = PROJECT_ROOT / "smolvla_v2_pro-aug_no_val_output"
 
 # ── Dataset ───────────────────────────────────────────────────────────────────
 # "local/" prefix tells lerobot-train to load from DATASET_ROOT on disk
 # instead of downloading from HuggingFace Hub.
-DATASET_REPO_ID = "local/cylinder_v2"
-POLICY_REPO_ID = "local/smolvla-v2-trained-policy"
+DATASET_REPO_ID = "local/cylinder_v2_pro-aug_no_val"
+POLICY_REPO_ID = "local/smolvla-v2-pro-aug-no-val-trained-policy"
 
 # ── Training hyperparameters ──────────────────────────────────────────────────
 STEPS          = 30000
@@ -44,14 +73,55 @@ SAVE_FREQ      = 6000    # save a checkpoint every N steps
 
 # ── WandB ─────────────────────────────────────────────────────────────────────
 WANDB_ENABLE   = True
-WANDB_PROJECT  = "smolvla_v2"
+WANDB_PROJECT  = "smolvla_v2-pro-aug_no-val"
+
+# ── Data augmentation ─────────────────────────────────────────────────────────
+# Applied to camera images during training to improve generalisation.
+# Mirrors the transforms your supervisor recommended, implemented via
+# lerobot's built-in --dataset.image_transforms flags.
+#
+# What each transform does for your task:
+#   RandomCrop+Resize : simulates slight camera misalignment between sessions
+#   RandomRotation    : handles minor camera tilt changes
+#   ColorJitter       : handles lighting changes (time of day, overhead lights)
+#
+# Set AUGMENTATION_ENABLE = False to train without augmentation (baseline run).
+AUGMENTATION_ENABLE = True
+ 
+# Crop ratio: image is cropped to this fraction of its size then resized back.
+# 0.95 = crop 5% off edges. Subtle — avoids cutting important content.
+CROP_RATIO = 0.95
+ 
+# Rotation range in degrees. ±5° is small enough not to distort the task
+# geometry but enough to handle slight camera tilts.
+ROTATION_DEGREES = 5.0
+ 
+# ColorJitter parameters — matching your supervisor's example exactly.
+# brightness=0.3 : ±30% brightness variation
+# contrast=0.4   : ±40% contrast variation
+# saturation=0.5 : ±50% saturation variation
+# hue=0.0        : no hue shift (keeps red cylinder recognisably red)
+BRIGHTNESS  = 0.2
+CONTRAST    = 0.2
+SATURATION  = 0.2
+HUE         = 0.0
 
 # ── Cache dirs to clear before each run ───────────────────────────────────────
 # Removes stale HuggingFace/lerobot caches that can cause dataset loading
 # errors between runs. Does NOT touch your dataset folder or weights.
+
+
 CACHE_DIRS_TO_CLEAR = [
     Path.home() / ".cache" / "huggingface" / "datasets",
     Path.home() / ".cache" / "lerobot",
+    # Add these — lerobot/HF can cache arrow indices here too:
+    Path.home() / ".cache" / "huggingface" / "hub",
+    Path("/tmp") / "lerobot",                          # sometimes used for temp arrow files
+    Path("/scratch0/yjoshi") / ".cache",               # scratch-local cache if any
+    Path("/scratch0/yjoshi/.cache/huggingface"),
+    Path("/scratch0/yjoshi/.cache/lerobot"),
+    Path("/scratch0/yjoshi/.cache/torch"),
+    Path("/scratch0/yjoshi/.cache/triton"),
 ]
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -101,6 +171,7 @@ def build_command(job_name: str, run_output_dir: Path) -> list[str]:
         # "--policy.type=smolvla",
         f"--policy.path={WEIGHTS_PATH}",       # load smolvla_base weights locally
         f"--policy.repo_id={POLICY_REPO_ID}",
+        f"--policy.push_to_hub=false",
 
         # ── Dataset ───────────────────────────────────────────────────────────
         f"--dataset.repo_id={DATASET_REPO_ID}",  # "local/..." = use local files
@@ -127,6 +198,20 @@ def build_command(job_name: str, run_output_dir: Path) -> list[str]:
         f"--wandb.enable={'true' if WANDB_ENABLE else 'false'}",
         f"--wandb.project={WANDB_PROJECT}",
     ]
+    
+    # ── Data augmentation ─────────────────────────────────────────────────────
+    # lerobot v0.3.3 applies these transforms to every camera image at training
+    # time. They are NOT applied at inference time — only during training.
+    # The transforms are applied in the order listed here.
+    if AUGMENTATION_ENABLE:
+        cmd += [
+        "--dataset.image_transforms.enable=true",
+        "--dataset.image_transforms.max_num_transforms=5",
+        "--dataset.image_transforms.random_order=true",
+        ]
+    else:
+        cmd += ["--dataset.image_transforms.enable=false"]
+    
     return cmd
 
 
@@ -147,6 +232,14 @@ def print_config(job_name: str, run_output_dir: Path):
     print(f"  Weights       : {WEIGHTS_PATH}")
     print(f"  Output dir    : {run_output_dir}")
     print(f"  WandB project : {WANDB_PROJECT if WANDB_ENABLE else 'disabled'}")
+    print(f"  Augmentation  : {'ENABLED' if AUGMENTATION_ENABLE else 'DISABLED'}")
+    if AUGMENTATION_ENABLE:
+        print(f"    Crop ratio    : {CROP_RATIO}")
+        print(f"    Rotation      : ±{ROTATION_DEGREES}°")
+        print(f"    Brightness    : {BRIGHTNESS}")
+        print(f"    Contrast      : {CONTRAST}")
+        print(f"    Saturation    : {SATURATION}")
+        print(f"    Hue           : {HUE}")
     print("=" * 60)
     print()
 
@@ -162,7 +255,8 @@ def main():
             print(f"ERROR: {label} not found at {path}")
             sys.exit(1)
 
-    for fname in ["info.json", "episodes.jsonl", "tasks.jsonl", "stats.json"]:
+    for fname in ["info.json", "episodes.jsonl", "tasks.jsonl",
+                  "stats.json", "episodes_stats.jsonl"]:
         fpath = DATASET_ROOT / "meta" / fname
         if not fpath.exists():
             print(f"ERROR: missing meta file: {fpath}")
@@ -203,6 +297,7 @@ def main():
             stderr=subprocess.STDOUT,
             text=True,
             cwd=str(LEROBOT_DIR),
+            env=env
         )
         for line in process.stdout:
             print(line, end="")

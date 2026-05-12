@@ -9,5 +9,5 @@ smolvla_v2_output/
 dataset-v2-raw/
 dataset-v2-pro/
 smolvla_v2_output_raw_data_no_validation/
-smolvla_v2_output_pro_data_no_validation/
-smolvla_v2_output_pro_data_with_validation/
+smolvla_v2_pro-aug_no_val_output/
+smolvla_v2_pro-aug_with_val_output/
