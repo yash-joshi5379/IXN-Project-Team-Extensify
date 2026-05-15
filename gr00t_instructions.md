@@ -307,7 +307,7 @@ python /workspace/Isaac-GR00T/deployment_scripts/export_onnx.py \
   --onnx_model_path /tmp/onnx_export
 ```
 
-This takes 10–20 minutes. The script may print warnings - these are harmless.
+This takes 10–20 minutes. The script may print warnings but they're harmless.
 
 ### 7.4 Collect Deployment Files
 
@@ -362,10 +362,6 @@ pip install transformers==4.51.3
 ```bash
 find /tmp/checkpoints -name "metadata.json" -exec rm {} \;
 ```
-
-### WandB API key rejected
-**Cause:** New WandB keys (`wandb_v1_...`) are 86 characters, but this version of GR00T expects 40-character legacy keys.  
-**Fix:** Use `--report-to tensorboard` instead.
 
 ### `opset_version=19` error during ONNX export
 **Cause:** torch 2.1 only supports ONNX opset up to 17.  
