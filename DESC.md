@@ -44,7 +44,7 @@ The project is divided into several ROS 2 packages:
   - **Gripper**: Position-controlled via the `split` tendon (PD on tendon position). Command `0.0` = open (tendon pos 0 rad), `1.0` = closed (tendon pos 0.85 rad).
   - **xHand**: Postural interpolation. Commands are mapped to a linear blend between predefined `OPEN` and `CLOSED` joint configurations.
 
-### Deep Dive: IK Physics
+### IK Physics
 
 The simulation translates Cartesian commands into joint positions using **Differential Inverse Kinematics**. This allows the operator to control the end-effector (EE) in 3D space without managing individual joint angles.
 

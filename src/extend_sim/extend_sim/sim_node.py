@@ -182,9 +182,9 @@ class SimNode(Node):
         if cyl_jid < 0:
             return  # scene has no cylinder
 
-        # 30×30 cm square centred at [0.35, 0.35]: x/y ∈ [0.20, 0.50]
-        X_RANGE = (0.20, 0.50)
-        Y_RANGE = (0.20, 0.50)
+        # 50×50 cm square centred at [0.35, 0.35]: x/y ∈ [0.10, 0.60]
+        X_RANGE = (0.10, 0.60)
+        Y_RANGE = (0.10, 0.60)
         MIN_REACH = 0.28  # m — closer and the gripper can't orient to grasp
         MAX_REACH = 0.62  # m — reliable workspace boundary
 

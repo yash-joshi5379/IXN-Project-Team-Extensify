@@ -1,4 +1,4 @@
-# Extend Robotics — VLA Simulation Workspace
+# Extend Robotics - VLA Simulation Workspace
 
 A MuJoCo-based simulation environment for collecting robotic demonstration data to train Vision-Language-Action (VLA) models. Built on ROS 2 Humble, it provides a full pipeline from teleoperation to structured episode recording, matching the cadence and data format of the real robot system.
 
@@ -9,7 +9,7 @@ A MuJoCo-based simulation environment for collecting robotic demonstration data 
 
 ## What this is
 
-This workspace simulates an **xArm7 robotic arm** in a tabletop pick-and-place environment. An operator uses the keyboard to move the arm in Cartesian space, open and close the gripper, and record demonstrations. Each recorded episode captures joint states, actions, and synchronized feeds from two cameras — a wrist-mounted camera and a static overhead camera — all saved into a single Parquet file ready for model training.
+This workspace simulates an **xArm7 robotic arm** in a tabletop pick-and-place environment. An operator uses the keyboard to move the arm in Cartesian space, open and close the gripper, and record demonstrations. Each recorded episode captures joint states, actions, and synchronized feeds from two cameras - a wrist-mounted camera and a static overhead camera - all saved into a single Parquet file ready for model training.
 
 The simulation is designed to closely mirror the real robot setup: joint states publish at 150 Hz, the physics engine runs at 1000 Hz, and the IK controller uses the same damped least-squares algorithm used on the physical hardware.
 
@@ -34,8 +34,8 @@ Each scene includes a small orange cylinder placed on the table as the task obje
 ## Requirements
 
 - Docker and Docker Compose
-- A display (X11) — the MuJoCo viewer renders to the host desktop via X11 forwarding
-- No GPU required — offscreen rendering uses EGL, viewer uses GLFW over X11
+- A display (X11) - the MuJoCo viewer renders to the host desktop via X11 forwarding
+- No GPU required - offscreen rendering uses EGL, viewer uses GLFW over X11
 
 ---
 
@@ -43,7 +43,7 @@ Each scene includes a small orange cylinder placed on the table as the task obje
 
 Everything runs inside a Docker container based on `osrf/ros:humble-desktop-full`. The workspace directory is bind-mounted into the container, so any edits on the host are immediately reflected without rebuilding the image.
 
-**First time only — build the image:**
+**First time only - build the image:**
 ```bash
 cd ~/IXN-Project-Team-Extensify/docker
 docker compose build
@@ -70,7 +70,7 @@ You'll need to run the `source` command in every new terminal you open into the 
 
 Everything starts from a single launch command. Open three terminals, all inside the container with the workspace sourced.
 
-**Terminal 1 — launch the sim, recorder, and viewer:**
+**Terminal 1 - launch the sim, recorder, and viewer:**
 ```bash
 ros2 launch extend_bringup sim.launch.py scene:=gripper
 ```
@@ -87,7 +87,7 @@ To run headless (no viewer window, useful for scripted collection):
 ros2 launch extend_bringup sim.launch.py use_viewer:=false
 ```
 
-**Terminal 2 — start teleoperation:**
+**Terminal 2 - start teleoperation:**
 ```bash
 ros2 run extend_teleop teleop_node
 ```
@@ -108,7 +108,7 @@ The teleop node reads keyboard input and publishes Cartesian delta commands at 2
 | `P` | Toggle precision mode (1 mm steps instead of 20 mm) |
 | `X` / `Esc` | Quit teleop |
 
-The arm's Cartesian speed is capped at 0.5 m/s and each joint is limited to 180°/s — matching the real xArm7's rated maximums. Precision mode is useful when you need fine control near the object before grasping.
+The arm's Cartesian speed is capped at 0.5 m/s and each joint is limited to 180°/s - matching the real xArm7's rated maximums. Precision mode is useful when you need fine control near the object before grasping.
 
 ![Teleop in action](docs/images/teleop_demo.png)
 *Operator moving the arm toward the cylinder before closing the gripper*
@@ -143,7 +143,7 @@ ros2 run rqt_image_view rqt_image_view
 
 Recordings are controlled by publishing string commands to `/recorder_cmd`. The recorder captures at 10 Hz and saves both camera feeds alongside joint states and actions.
 
-**Terminal 3 — control recording:**
+**Terminal 3 - control recording:**
 ```bash
 # Start a new episode
 ros2 topic pub --once /recorder_cmd std_msgs/msg/String "data: 'start'"

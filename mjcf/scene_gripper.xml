@@ -37,9 +37,21 @@
     </body>
 
     <!-- target placement zone -->
-    <body name="target_site" pos="0.5 0.2 0.001">
+    <body name="target_site" pos="0.35 0.35 0.001">
       <geom type="cylinder" size="0.028 0.001" material="target"
             contype="0" conaffinity="0"/>
+    </body>
+
+    <!-- Cylinder spawn zone border (50x50 cm centred at [0.35, 0.35]) -->
+    <body name="spawn_zone_border" pos="0 0 0">
+      <geom type="box" size="0.25 0.003 0.001" pos="0.35 0.10 0.001"
+            rgba="1.0 0.85 0.0 1.0" contype="0" conaffinity="0"/>
+      <geom type="box" size="0.25 0.003 0.001" pos="0.35 0.60 0.001"
+            rgba="1.0 0.85 0.0 1.0" contype="0" conaffinity="0"/>
+      <geom type="box" size="0.003 0.25 0.001" pos="0.10 0.35 0.001"
+            rgba="1.0 0.85 0.0 1.0" contype="0" conaffinity="0"/>
+      <geom type="box" size="0.003 0.25 0.001" pos="0.60 0.35 0.001"
+            rgba="1.0 0.85 0.0 1.0" contype="0" conaffinity="0"/>
     </body>
 
     <!-- cameras -->
