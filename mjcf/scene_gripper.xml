@@ -1,0 +1,55 @@
+<mujoco model="extend_robotics_gripper_scene">
+
+  <include file="../assets/xarm7/xarm7.xml"/>
+
+  <option integrator="implicitfast" timestep="0.001" iterations="200" tolerance="1e-10"/>
+
+  <statistic center="0.3 0 0.4" extent="0.8"/>
+
+  <visual>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/>
+    <rgba haze="0.15 0.25 0.35 1"/>
+    <global azimuth="150" elevation="-20"/>
+  </visual>
+
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0"
+             width="512" height="512"/>
+    <texture name="groundplane" type="2d" builtin="checker"
+             rgb1="0.2 0.2 0.2" rgb2="0.3 0.3 0.3" width="512" height="512"/>
+    <material name="groundplane" texture="groundplane" texrepeat="5 5" texuniform="true"/>
+    <material name="cylinder_obj" rgba="0.8 0.3 0.1 1"/>
+    <material name="target"       rgba="0.2 0.8 0.2 0.4"/>
+  </asset>
+
+  <worldbody>
+    <light pos="0 0 1.5" dir="0 0 -1" directional="true"/>
+    <geom name="ground" type="plane" size="2 2 0.05" material="groundplane"
+          conaffinity="1" condim="3"/>
+
+    <!-- task object: cylinder to pick -->
+    <body name="cylinder_obj" pos="0.5 0.0 0.03">
+      <freejoint name="cylinder_joint"/>
+      <geom type="cylinder" size="0.025 0.03" material="cylinder_obj"
+            mass="0.3" condim="4" friction="1.2 0.01 0.001"
+            solimp="0.95 0.99 0.001" solref="0.001 1"/>
+      <site name="cylinder_top" pos="0 0 0.03" size="0.005"/>
+    </body>
+
+    <!-- target placement zone -->
+    <body name="target_site" pos="0.5 0.2 0.001">
+      <geom type="cylinder" size="0.028 0.001" material="target"
+            contype="0" conaffinity="0"/>
+    </body>
+
+    <!-- cameras -->
+    <camera name="overhead_cam" pos="0.3 0 1.2" euler="0 0 0"/>
+
+  </worldbody>
+
+  <keyframe>
+    <key name="scene_home" 
+         qpos="0 -.247 0 .909 0 1.15644 0 0 0 0 0 0 0 0.5 0.0 0.03 1 0 0 0"
+         ctrl="0 -.247 0 .909 0 1.15644 0 0"/>
+  </keyframe>
+</mujoco>

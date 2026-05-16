@@ -1,448 +1,228 @@
-# IXN-Project-Team-Extensify
+# Extend Robotics — VLA Simulation Workspace
 
-Repository to store all simulation and hardware-based code.
+A MuJoCo-based simulation environment for collecting robotic demonstration data to train Vision-Language-Action (VLA) models. Built on ROS 2 Humble, it provides a full pipeline from teleoperation to structured episode recording, matching the cadence and data format of the real robot system.
 
-Goal: create and train a SmolVLA model to automate a robot arm (XArm 7) with a 2-finger gripper to grasp a cylinder and place it into a slot.
+![Simulation Overview](docs/images/sim_overview.png)
+*The MuJoCo viewer showing the xArm7 with parallel gripper in the gripper scene*
 
-## 1. Installation and Setup
-1. Clone this repository and go into the project directory
-```
-git clone https://github.com/yash-joshi5379/IXN-Project-Team-Extensify.git
-cd IXN-Project-Team-Extensify/
-```
-
-2. Create a virtual environment, activate it, and install all requirements
-```
-python -m venv .venv
-.venv\Scripts\activate      # This is for Windows, on Linux/macOS try: source .venv/bin/activate
-pip install -r requirements.txt
-```
-
-3. Check the ```load_data_test.py``` file runs without errors by running ```python src/load_data_test.py```. It should print the following output.
-```
-                                              action  ... next.done
-0  [0.013189731, 0.7745382, 0.0015100722, 2.57575...  ...     False
-1  [0.013216187, 0.77431756, 0.0014658261, 2.5753...  ...     False
-2  [0.01322409, 0.77423114, 0.0014516916, 2.57520...  ...     False
-3  [0.01282496, 0.7741936, 0.002053811, 2.5749416...  ...     False
-4  [0.013206642, 0.7740894, 0.0016700205, 2.57549...  ...     False
-
-[5 rows x 11 columns]
-['action', 'observation.effort', 'observation.force_torque', 'observation.state', 'observation.qvel', 'timestamp', 'frame_index', 'episode_index', 'index', 'task_index', 'next.done']
-action                       object
-observation.effort           object
-observation.force_torque     object
-...
-```
-
-4. While the venv is active, clone the LeRobot repository
-```
-git clone https://github.com/huggingface/lerobot.git
-cd lerobot
-pip install -e .
-git checkout v0.3.3
-cd ..
-pip install rerun-sdk==0.22.1 datasets==3.6.0
-```
-Note: The -e means "editable," so if you change anything in the LeRobot folder, it updates automatically in your project.
-
-Note: The ```pip install -e .``` command took around 10 mins on my laptop.
-
-5. Uninstall the "headless" version of OpenCV installed from when we installed lerobot, and install the GUI-enabled version:
-```
-(.venv) ...\IXN-Project-Team-Extensify>pip uninstall opencv-python-headless -y
-(.venv) ...\IXN-Project-Team-Extensify>pip install opencv-python
-```
-
-6. From the main project directory, run the ```check_data.py``` script  with ```EPISODE = episode_000024``` to check the installation works.
-```
-(.venv) ...\IXN-Project-Team-Extensify>python src\check_data.py
-```
-
-It should print the following:
-```
-episode_000024 has 529 rows of data
-Video frame dimensions (height, wdith, channels): (256, 256, 3)
-```
-
-7. Install FFmpeg through Command Prompt/PowerShell (used for cropping videos later)
-```
-(.venv) ...\IXN-Project-Team-Extensify> winget install ffmpeg
-```
-Note: This is for Windows, on Linux type ```sudo apt install -y ffmpeg``` and on Mac try ```brew install ffmpeg```
+---
 
-8. After installing FFmpeg, close the terminal completely and open a new one, which allows the system to refresh and recognise the new software. In this new terminal, type ```ffmpeg -version```. You should see something like:
-```
-ffmpeg version 8.1-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers
-built with gcc 15.2.0 (Rev11, Built by MSYS2 project)
-...
-```
-
-
-
-## Preprocessing Data (MUST BE DONE FOR EACH EPISODE)
-Before training a model, all videos and datasets must be trimmed upto when the task actually ends (when the cylinder falls into the slot), since any data recorded afterwards is not useful to us.
-
-1. Choose an episode number and camera angle, and adapt the ```VIDEO_PATH``` in ```find_end_frame.py```
-```
-VIDEO_PATH = "dataset/raw/videos/static_camera/episode_000000.mp4"      # I did episode 0 and static cam
-```
-
+## What this is
 
-2. Run ```find_end_frame.py```. Press/hold the 'd' key to move the video forward, press 'a' to move back a frame, and enter 'q' when you find the perfect end frame for the chosen episode.
-```
-(.venv) ...\IXN-Project-Team-Extensify>python src\find_end_frame.py
+This workspace simulates an **xArm7 robotic arm** in a tabletop pick-and-place environment. An operator uses the keyboard to move the arm in Cartesian space, open and close the gripper, and record demonstrations. Each recorded episode captures joint states, actions, and synchronized feeds from two cameras — a wrist-mounted camera and a static overhead camera — all saved into a single Parquet file ready for model training.
 
-Controls:
- 'd' - Next frame
- 'a' - Previous frame
- 'q' - Quit and print final frame number
+The simulation is designed to closely mirror the real robot setup: joint states publish at 150 Hz, the physics engine runs at 1000 Hz, and the IK controller uses the same damped least-squares algorithm used on the physical hardware.
 
----> The task ends at FRAME: 494 <---   # I ran episode 0 and I got frame 494 as the end
-```
+---
 
-3. Repeat this process but with the other camera angle. Change the ```VIDEO_PATH``` in ```find_end_frame.py```, and verify you get the same end frame index.
-```
-VIDEO_PATH = "dataset/raw/videos/onboard_camera/episode_000000.mp4"      # I used onboard cam to verify end index, and it is still frame 494.
-```
+## Robot configurations
 
-4. With this end frame index and episode number, put them into ```process_episode.py```, and run ```process_episode.py``` to process the data and videos.
-```
-# In process_episode.py
+Two end-effector configurations are supported, each with its own MuJoCo scene:
 
-# --- Configuration (THIS IS ALL YOU NEED TO CHANGE PER EPSISODE) ---
-EPISODE = "episode_000000"   # Episode number (ensure the number has 6 characters) 
-END_FRAME = 494              # The exact frame the task finishes (obtained from find_end_frame.py)
+| Scene | End effector | Launch argument |
+|-------|-------------|-----------------|
+| Gripper | xArm parallel gripper | `scene:=gripper` |
+| xHand | xHand1 multi-fingered hand (12 DOF) | `scene:=xhand` |
 
+![Gripper scene](docs/images/scene_gripper.png)
+*Left: gripper scene with the orange cylinder task object. Right: xHand scene.*
 
-# Run the script
-(.venv) ...\IXN-Project-Team-Extensify>python src\process_episode.py
+Each scene includes a small orange cylinder placed on the table as the task object, spawned at a random position within a 30×30 cm zone at 45° from the arm base on each reset. A semi-transparent green disc marks the target placement area.
 
-# OUTPUT SHOULD BE THIS (for your episode number):
-[episode_000000] Trimming parquet data...
-Parquet file trimmed.
-[episode_000000] Running FFmpeg padding on dataset/raw/videos/static_camera/episode_000000.mp4...
-  -> Saved perfectly squared video to dataset/processed/videos/static_camera/episode_000000.mp4
-[episode_000000] Running FFmpeg padding on dataset/raw/videos/onboard_camera/episode_000000.mp4...
-  -> Saved perfectly squared video to dataset/processed/videos/onboard_camera/episode_000000.mp4
+---
 
-Success! episode_000000 is processed.
-```
+## Requirements
 
-5. Once this is complete, you should see the dataset and both videos for your episode under ```dataset/processed/data``` and ```dataset/processed/videos``` respectively.
+- Docker and Docker Compose
+- A display (X11) — the MuJoCo viewer renders to the host desktop via X11 forwarding
+- No GPU required — offscreen rendering uses EGL, viewer uses GLFW over X11
 
-6. For a final check, in ```check_data.py```, edit ```EPISODE = episode_xxxxxxx``` to your episode number and run ```check_data.py```
-```
-# Run this:
+---
 
-(.venv) ...\IXN-Project-Team-Extensify>python src\check_data.py
+## Setup
 
-# What you should see:
+Everything runs inside a Docker container based on `osrf/ros:humble-desktop-full`. The workspace directory is bind-mounted into the container, so any edits on the host are immediately reflected without rebuilding the image.
 
-episode_xxxxxx has xxx rows of data                                 # Should match your episode number and the end frame index which you identified.
-Video frame dimensions (height, wdith, channels): (256, 256, 3)     # Must be (256, 256, 3) 
+**First time only — build the image:**
+```bash
+cd ~/IXN-Project-Team-Extensify/docker
+docker compose build
 ```
 
-7. Repeat this whole preprocessing sequence for all your episodes.
+This installs MuJoCo, PyArrow, OpenCV, and the other dependencies listed in `docker/Dockerfile`.
 
-## Using the LeRobot Visualiser
-Once all data has been processed, we must verify it is accurate before training a VLA model. To do this, we will use the LeRobot Visualiser to simultaneously view videos and data plots for each episode.
-
-1. Open the project folder, activate your venv and go into the main project directory.
-```
-...\IXN-Project-Team-Extensify>.venv\Scripts\activate       # activate venv
-(.venv) ...\IXN-Project-Team-Extensify>                     # you should see this
+**Start the container:**
+```bash
+docker compose up -d
 ```
 
-2. From the project root directory, run this command:
+**Open a shell inside it:**
+```bash
+docker exec -it extend_robotics_ixn bash
+source /extend_robotics_ws/install/setup.bash
 ```
-(.venv) ...\IXN-Project-Team-Extensify>python src\visualise_episode.py 0
-```
 
-A Rerun window should open and after a few seconds, you should see:
-- Both camera feeds (static and wrist cameras) playing simultaneously
-- Action data plot (7 arm joints & gripper commands)
-- State data plot (7 arm joints & gripper joint angles)
-- next.done data plot (Boolean flag that spikes at the final frame of the episode)
-
-Note: After running the command above, many things will be printed in the terminal as well as a progress bar, showing how long it will take to render the plots and video footages. Once this progress bar reaches 100%, all data has fully loaded, so then press the play button in the Rerun window to watch the videos and plots move smoothly over time.
-```
-100%|████████████████████████████████████████████████████████████████████████████████████| 31/31 [01:17<00:00,  2.50s/it]
+You'll need to run the `source` command in every new terminal you open into the container. If you rebuild the ROS packages, source again afterwards.
 
-# Press the play button in the Rerun window once this reaches 100%
-```
+---
 
-Note: If you get this error: **`ModuleNotFoundError: rerun`:**, try installing rerun again:
-```
-(.venv) ...\IXN-Project-Team-Extensify> pip install rerun-sdk
-```
+## Running the simulation
 
-Note: If the Rerun window opens but shows no data, make sure you run the ```python src\visualise_episode.py 0``` command from the main project directory ```(.venv) ...\IXN-Project-Team-Extensify>```.
+Everything starts from a single launch command. Open three terminals, all inside the container with the workspace sourced.
 
-3. Once you have the visualiser working, you can change the episode number. To do this, in the command above, change ```python src\visualise_episode.py 0``` to any number between 0 and 65. E.g.
-```
-python src/visualise_episode.py 47    # To visualise episode 47
+**Terminal 1 — launch the sim, recorder, and viewer:**
+```bash
+ros2 launch extend_bringup sim.launch.py scene:=gripper
 ```
 
-4. For each episode, verify the following criteria:
-- the videos end with the cylinder in the slot
-- the gripper channel in the action plot rises from 0 to 1 during pick-up
-- the action and state plots move together with no sudden jumps
-- the next.done plot shows only a single spike at the very end and nothing else
+This starts three nodes at once: the physics engine (`sim_node`), the passive 3D viewer (`viewer_node`), and the data recorder (`recorder_node`). The MuJoCo viewer window will appear on your desktop.
 
-5. If the episode meets all 4 requirements, write ```Episode_xxxxxx - valid``` in ```notes.txt```. If not, make a note in ```notes.txt``` and describe which requirement is not met.
-
-6. Repeat for all other allocated episodes.
-
-## Cleaning Dataset
-Using the LeRobot visualiser, we can see if any videos or data plots contain disturbances or sharp jumps. If they do, we do not want to contain this episode in our final dataset for model training, as this erroneous data could worsen our model.
-
-1. To remove an episode, activate your venv, navigate to the project root directory, and run ```src\remove_episode.py x``` where ```x``` is the episode number to be removed. E.g.
-```
-(.venv) ...\IXN-Project-Team-Extensify>python src\remove_episode.py 0       # to remove episode 0
-```
-
-Note: After removing an episode, all subsequent episodes are renumbered, so if you want to remove multiple episodes, remove the **highest numbered episode first** and **lowest numbered episode last**. E.g.
+To use the xHand instead:
+```bash
+ros2 launch extend_bringup sim.launch.py scene:=xhand
 ```
-python src\remove_episode.py 66   # remove highest numbered episode first
-python src\remove_episode.py 17   # then lower ones
-python src\remove_episode.py 0    # and lowest numbered episode last
-```
 
-## Setup for Accessing UCL Remote GPU Workstations
-In order to train our VLA models, we need GPUs for parallel processing and complex computations. For this, we can access remote workstations which have RTX 4070 Ti Super and RTX 4090 GPUs. Here is how to access these workstations:
-
-1. First we need to setup a VPN to access the UCL network. Enter the following URL into a web browser:
-```
-https://www.ucl.ac.uk/isd/services/get-connected/ucl-virtual-private-network-vpn
+To run headless (no viewer window, useful for scripted collection):
+```bash
+ros2 launch extend_bringup sim.launch.py use_viewer:=false
 ```
-This webpage contains connection guides and clear instructions for installing the Cisco Anyconnect VPN onto Windows and MacOS devices. Linux installation is possible but not clearly documented on UCL's website, so check ```linux-vpn-install.md``` in this repo for a guide on installing the VPN on Linux devices.
 
-2. Once the VPN is installed, we can access the Remote Workstation Service. Enter the following URL into a web browser:
+**Terminal 2 — start teleoperation:**
+```bash
+ros2 run extend_teleop teleop_node
 ```
-https://tsg.cs.ucl.ac.uk/remote-gpu-workstations/
-```
-
-3. Follow the instructions on the webpage to download the UCL CS Root CA certificate and add it to your web browser (Firefox/Chrome).
-
-4. Now activate your Cisco AnyConnect VPN, and then paste this URL: ```https://mydesk.cs.ucl.ac.uk/``` into your web browser. If you are not connected to the VPN at this stage, you will not be able to access this URL.
 
-5. Login to the UCL CS booking system using your UCL Computer Science account username and password **(NOT THE SAME AS YOUR UCL EMAIL AND PASSWORD)**. We got given these CS login details on the first day of our first year. If you cannot remember the details or have lost the details, visit this URL: ```https://tsg.cs.ucl.ac.uk/contact-us/```, and either visit Malet Place in UCL's Bloomsbury Campus or submit the CS Helpdesk Request (much easier).
+---
 
-6. Once you have logged into the UCL CS booking system, you will see a schedule of all GPU workstations and their status (open, reserved, past .etc). You can hover over each workstation name (E.g. bumblebee.cs.ucl.ac.uk) to see which GPU it has.
-  
-7. To book a session, click on any open (white) cell for your chosen workstation. Give your reservation a title, and adapt the Begin and End times to when you want (maximum reservation time is 72 hours). Click the **Create** button to make the reservation, and you should see your reservation appear on the main schedule.
+## Controlling the arm
 
-8. Once your session time has started, you will need to use an SSH tunnel to access your remote GPU workstation.
-   
-   *Creating an SSH Tunnel on Linux/macOS*
+The teleop node reads keyboard input and publishes Cartesian delta commands at 20 mm per keypress by default.
 
-   1. First launch a new terminal on your local laptop/PC, and run the following ssh command, substituting the host name of the machine you booked, and your UCL CS username for $CS_USER. If asked for a password, enter your UCL CS password.
-   ```
-   ssh -L 8081:<host>.cs.ucl.ac.uk:8443 $CS_USER@knuckles.cs.ucl.ac.uk
-   ```
-  
-   *Creating an SSH Tunnel on Windows*
+| Key | Action |
+|-----|--------|
+| `W` / `S` | Move end-effector forward / backward |
+| `A` / `D` | Move end-effector left / right |
+| `Q` / `E` | Move end-effector up / down |
+| `Space` | Toggle gripper / hand open and closed |
+| `R` | Reset simulation and randomise cylinder position |
+| `P` | Toggle precision mode (1 mm steps instead of 20 mm) |
+| `X` / `Esc` | Quit teleop |
 
-   1. Launch **WSL** in a new terminal/PowerShell window by running ```wsl``` and then ```cd```. If you do not have WSL installed, simply install it by running ```wsl --install``` in a PowerShell window. Restart your machine after installing WSL to ensure all future terminals have WSL capabilities.
-  
-   2. Now in your **WSL** terminal, run the following ssh command, substituting the host name of the machine you booked, and your UCL CS username for $CS_USER
-   ```
-   ssh -L 8081:<host>.cs.ucl.ac.uk:8443 $CS_USER@knuckles.cs.ucl.ac.uk
-   ```
+The arm's Cartesian speed is capped at 0.5 m/s and each joint is limited to 180°/s — matching the real xArm7's rated maximums. Precision mode is useful when you need fine control near the object before grasping.
 
-      Note: If this doesn't work, open a new PowerShell window and run the same command, without using WSL. If ever asked for a password, enter your UCL CS password.
+![Teleop in action](docs/images/teleop_demo.png)
+*Operator moving the arm toward the cylinder before closing the gripper*
 
-**If your SSH Tunnel connection is successful, you should see comething like this:**
-```
-Last login: Mon Apr 13 23:48:58 2026 from 90.254.190.73
->> This machine is running CentOS 7.9
-                                                   
->> For all general enquiries, please contact the Helpdesk in 4.07, on
-   extn 37280 or e-mail 'request@cs.ucl.ac.uk'
-
-   This machines reboots on the first wednesday of each month
->> Taught students must leave the building before midnight 
-
-** To see this message again type "cat /etc/motd"
-...
-```
-
-To double check the connection is successful, the terminal should look like ```$CS_USER@knuckles%```, with your CS username instead of $CS_USER. 
-To triple check, enter the command ```pwd``` and you should see the following output, with your UCL starting year instead of <year> and your CS username instead of $CS_USER :
-```
-$CS_USER@knuckles% pwd            # you enter pwd
-/cs/student/ug/<year>/$CS_USER    # you should see this with your starting year and CS username instead of <year> and $CS_USER       
-```
+---
 
-**IMPORTANT: Keep this terminal window open (the successful SSH Tunnel connection), because this window is the bridge for the SSH connection. If the terminal window, closes, the connection will be lost.**
+## Camera feeds
 
-9. Now that you have remotely connected to the remote GPU workstation via an SSH Tunnel, we can access this connection in VSCode. To do this, open VSCode and install the **Remote - SSH** extension.
+The simulation publishes two camera streams, both at 10 Hz and 224×224 RGB:
 
-10. Open the Command Palette in VSCode by either clicking the Settings icon (bottom right corner of VSCode window) and clicking on the Command Palette option, or by using the keyboard shortcut ```Ctrl+Shift+P```. In the Command Palette, type in and select the option: **Remote-SSH: Open SSH Configuration File**, then select the option which looks like: **.../.ssh/config**. In this config file, enter the following, substituting your CS username instead of $CS_USER and the remote workstation name instead of <host> :
-```
-Host knuckles
-    HostName knuckles.cs.ucl.ac.uk
-    User $CS_USER
-
-Host ucl-gpu
-    HostName <host>.cs.ucl.ac.uk
-    User $CS_USER
-    ProxyJump knuckles
-```
+| Topic | Camera | Description |
+|-------|--------|-------------|
+| `/rgb_image` | Wrist camera | Mounted on the gripper base, looking downward at the grasp area |
+| `/overhead_image` | Overhead camera | Static camera fixed at [0.3, 0, 1.2] m looking straight down |
 
-Then save and close this config file.
+![Camera views](docs/images/camera_views.png)
+*Left: wrist camera view. Right: overhead camera view.*
 
-11. In the bottom left corner of the VSCode window, you will see the symbol which looks like ```><``` (just under the settings icon). Click this symbol, click the **Connect to Host** option, then click the **ucl-gpu** option. A new VSCode window will appear, where you should enter your CS password in the text prompt area (you may need to enter it twice). After a few seconds, if you see **SSH: ucl-gpu** in the bottom right of the new VSCode window and no errors pop up, the connection is successful.
+To view them while the sim is running:
+```bash
+# Both feeds in separate windows
+ros2 run image_view image_view --ros-args -r image:=/rgb_image &
+ros2 run image_view image_view --ros-args -r image:=/overhead_image
 
-12. To double check the connection, open a new terminal in the successfully connected VSCode window. You should see ```$CS_USER@<host>%``` in this terminal, with your CS username instead of $CS_USER and the workstation name instead of <host>. Then run the command ```nvidia-smi``` to ensure the GPU is working, and you should see smoething like the following:
+# Or use rqt to switch between topics in one window
+ros2 run rqt_image_view rqt_image_view
 ```
-$CS_USER@<host>% nvidia-smi    # you should see this starting bit in the terminal, and you should run the command 'nvidia smi'
-Tue Apr 14 00:36:46 2026       
-+-----------------------------------------------------------------------------------------+
-| NVIDIA-SMI 580.126.09             Driver Version: 580.126.09     CUDA Version: 13.0     |
-+-----------------------------------------+------------------------+----------------------+
-| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
-| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
-|                                         |                        |               MIG M. |
-|=========================================+========================+======================|
-|   0  NVIDIA GeForce RTX 4070 ...    On  |   00000000:01:00.0 Off |                  N/A |
-|  0%   33C    P8             10W /  285W |      22MiB /  16376MiB |      0%      Default |
-|                                         |                        |                  N/A |
-+-----------------------------------------+------------------------+----------------------+
-
-+-----------------------------------------------------------------------------------------+
-| Processes:                                                                              |
-|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
-|        ID   ID                                                               Usage      |
-|=========================================================================================|
-|    0   N/A  N/A           21752      G   /usr/libexec/Xorg                        11MiB |
-+-----------------------------------------------------------------------------------------+
-```
 
-**This means we have successfully set up a remote connection to a GPU workstation in VSCode!!**
+---
 
-## Training a VLA Model on a UCL Remote GPU Workstation
-Now that we have set up the venv and are able to run Python scripts on the remote workstation, we move on to training a VLA model. This stage requires some steps on your local machine and some steps on the remote workstation.
+## Recording demonstrations
 
-### Stage A - On your local machine
-1. Create an account at **https://huggingface.co/join**
+Recordings are controlled by publishing string commands to `/recorder_cmd`. The recorder captures at 10 Hz and saves both camera feeds alongside joint states and actions.
 
-2. Create an access token at **https://huggingface.co/settings/tokens**, and you MUST give it **Write** permissions. Save the access token value somewhere safe.
+**Terminal 3 — control recording:**
+```bash
+# Start a new episode
+ros2 topic pub --once /recorder_cmd std_msgs/msg/String "data: 'start'"
 
-3. Ensure you are on your local machine in VSCode (>< symbol under the Settings icon should be grey). If you see the blue **SSH: ucl-gpu** button instead, follow **step 3** in the section **Terminating Remote Workstation Connection** to swtich back to your local machine instead of the remote workstation.
+# Save the episode
+ros2 topic pub --once /recorder_cmd std_msgs/msg/String "data: 'stop'"
 
-4. Navigate to the project root directory and activate your venv. Then run the command ```pip install --upgrade huggingface_hub``` to ensure you have the latest version of Hugging Face installed in your venv. To check the installation worked, run this command ```python -c "from huggingface_hub import model_info; print(model_info('gpt2'))"``` and the output should look something like this:
-```
-ModelInfo(id='openai-community/gpt2', author='openai-community', base_models=None, card_data={'base_model': None, 'datasets': None, 'eval_results': None, 'language': 'en', 'library_name': None, 'license': 'mit', 'license_name': None, 'license_link': None, ...
+# Discard if something went wrong
+ros2 topic pub --once /recorder_cmd std_msgs/msg/String "data: 'discard'"
 ```
-
-5. To login to Hugging Face in VSCode, run the command ```hf auth login```, and paste your access token value when asked for it. Also enter ```y``` when asked to add token as git credential. You should see ```Token is valid (permission: write).```
-
-6. Run the command: ```python src/upload_to_hf.py``` in the terminal to upload the processed dataset to your personal Hugging Face account. To check the upload is successful, there should be no errors in the terminal, and you should see a dataset called ```cylinder-pick-place``` in your profile on the Hugging Face website.
-
-7. Run the command: ```python src/download_smolvla_base_weights.py``` to download the SmolVLA base training weights to your local machine. Once downloaded, you should see a **smolvla_base_weights** folder appear in the file explorer, and it should be **grey**. 
 
-### Stage B - On Remote GPU Workstation
-1. Connect to your remote workstation host using VSCode. Check the instructions in the section **Setup for Accessing UCL Remote GPU Workstations** if you need help with any steps.
+Episodes are saved to `/extend_robotics_ws/data/` inside the container, which maps to the `data/` folder in this repository.
 
-2. In a VSCode terminal, go to your scratch space by running ```cd /scratch0/$USER```, clone the repository, and go into the repo with ```cd repo-name```. Then run ```code .```to see the project repo files on the left hand side of a new VSCode window.
+---
 
-3. Instead of making a venv this time, we will make a **conda env** for training. To do this, we first want to download Miniconda to our scratch space. Run these commands in a new **bash** terminal of the new VSCode window:
-```
-cd /scratch0/$USER
-wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-```
+## Data format
 
-4. Run the Miniconda installer with this command: ```bash Miniconda3-latest-Linux-x86_64.sh```. When prompted, press Enter to read the license and type yes to accept the license terms. When asked for the installation location, type ```/scratch0/$USER/miniconda3```. Then when asked to initialise Miniconda3, type yes. Finally to update our bash terminal, run the command ```source ~/.bashrc```. Your bash terminal should now start with ```(base) bash-5.1$ ```.
+Each episode is saved as a Parquet file named `episode_<scene>_<timestamp>.parquet`. Images are stored as JPEG-compressed binary columns (quality 90), and the file uses Snappy compression overall. This keeps file sizes small while remaining fast to read.
 
-5. Go into the project root directory with ```cd /scratch0/$USER/repo-name```. Then create the conda env and activate it by using the .yml file:
-```
-conda env create -f smolvla-gpu-train.yml -y
-conda activate smolvla-gpu-train
-```
+| Column | Type | Description |
+|--------|------|-------------|
+| `frame_index` | int32 | 0-based frame counter |
+| `timestamp` | float64 | Unix wall-clock time |
+| `observation.joint_positions` | list\<float32\> | Full joint state vector |
+| `observation.wrist_image` | binary | JPEG bytes from wrist camera |
+| `observation.overhead_image` | binary | JPEG bytes from overhead camera |
+| `action.ee_cmd` | list\<float32\> | Cartesian delta [dx, dy, dz] in metres |
+| `action.hand_cmd` | float32 | 0.0 = open, 1.0 = closed |
 
-6. Your bash terminal should now begin with ```(smolvla-gpu-train) bash-5.1$ ```. Now run these commands to clone the lerobot libaries required for training SmolVLA:
-```
-git clone https://github.com/huggingface/lerobot.git
-cd lerobot
-pip install -e ."[smolvla]"
-pip install torchcodec --index-url https://download.pytorch.org/whl/cu128
-conda install -c conda-forge av -y
-pip uninstall opencv-python-headless -y
-pip install opencv-python
-pip install 'lerobot[dataset]'
-cd ..
-```
+Reading an episode and decoding a frame:
+```python
+import pyarrow.parquet as pq
+import numpy as np
+import cv2
 
-7. Run ```cd ..``` to go back to ```/scratch0/$USER```.  Create a new folder there with this command ```mkdir -p /scratch0/$USER/lerobot_data```. This folder is where the SmolVLA model weights will go.
+table = pq.read_table('data/episode_gripper_20260516_120000.parquet')
+df = table.to_pandas()
 
-8. Switch back to your local machine in VSCode using the button under the settings icon. Then run the command below to copy the ```smolvla_base_weights``` which you installed to your local machine, to the remote workstation. In the command, substitute ```$CS_USER``` with your CS username, and substitute ```<host>``` with your remote workstation's name.
-On Windows:
+# Decode a wrist camera frame
+raw = np.frombuffer(df['observation.wrist_image'].iloc[0], np.uint8)
+rgb = cv2.cvtColor(cv2.imdecode(raw, cv2.IMREAD_COLOR), cv2.COLOR_BGR2RGB)
 ```
-scp -r -J $CS_USER@knuckles.cs.ucl.ac.uk .\smolvla_base_weights\ $CS_USER@<host>.cs.ucl.ac.uk:/scratch0/$CS_USER/IXN-Project-Team-Extensify/
-```
-On Linux/macOS:
-```
-rsync -avzP -e "ssh -J $CS_USER@knuckles.cs.ucl.ac.uk" ./smolvla_base_weights/ $CS_USER@<host>.cs.ucl.ac.uk:/scratch0/$USER/lerobot_data/smolvla_base_weights
-```
 
-9. Switch back to the remote workstation in VSCode, and go to your personal scratch space with ```cd /scratch0/$USER```. Then run this command, substituting your Hugging Face username for ```$HF_USER```:
-```
-mkdir -p /scratch0/$USER/lerobot_data/lerobot_home/$HF_USER/cylinder-pick-place
-```
+---
 
-10. Now run this command, again substituting your Hugging Face username for ```$HF_USER```:
-```
-cp -a /scratch0/$USER/IXN-Project-Team-Extensify/dataset/processed/. /scratch0/$USER/lerobot_data/lerobot_home/$HF_USER/cylinder-pick-place/
-```
+## Project structure
 
-11. Go back to the project root directory with ```cd repo-name```. Then run this command, , again substituting your Hugging Face username for ```$HF_USER```:
-```
-ls -F /scratch0/$USER/lerobot_data/lerobot_home/$HF_USER/cylinder-pick-place/
-```
-You should see this:
 ```
-data/  meta/  videos/
+├── assets/
+│   ├── xarm7/          # xArm7 URDF/MJCF and STL meshes
+│   └── xhand1/         # xHand1 meshes and config
+├── data/               # Recorded episodes (Parquet, git-ignored)
+├── docker/             # Dockerfile and docker-compose.yml
+├── mjcf/               # MuJoCo scene definitions
+│   ├── scene_gripper.xml
+│   └── scene_xhand.xml
+└── src/
+    ├── extend_bringup/  # Launch files
+    ├── extend_recorder/ # Episode recording node
+    ├── extend_sim/      # Physics engine + viewer nodes
+    └── extend_teleop/   # Keyboard teleoperation node
 ```
-
-
-
-94. Type ```hf auth login``` in the bash terminal with the conda env active, and then hit Enter. Paste in your access token value when prompted to. When asked to add the token as a git credential, type ```N``` as it is not needed now.
 
-95. Type ```wandb login``` in the bash terminal and hit Enter. It will print a URL in the terminal which looks like  **https://wandb.ai/authorize...**. Open this URL in a web browser, sign up for an account (I signed up with a Google account), click on your name in the top right corner of the webpage, go to API keys, and make a new key. Copy your API key, and paste it in the bash terminal. You should see ```Currently logged in as: ... to https://api.wandb.ai.```
+---
 
-96. Create a new **tmux** (terminal multiplexer) session in the bash terminal. This allows you to run the training session on a remote terminal so that the training does not stop if you accidentally close the terminal. To do this, use the command:
-```
-tmux new -s smolvla_train
-```
-
-97. You should see a green bar along the bottom of a new terminal window. Because tmux opens this new terminal window, run ```bash``` to make it a bash terminal, and reactivate your Conda environment with ```conda activate smolvla-gpu-train```. Run ```pip install 'lerobot[dataset]'```.  
+## Rebuilding after code changes
 
-98. Before running the training session, do a final check of some important details:
-- Check the GPU is active by running ```nvidia-smi```. The **Memory-Usage** should be quite low: mine shows **22MiB /  16376MiB**
-- Open config.py to ensure the ```DATASET_REPO_ID``` exactly matches your Hugging Face username and dataset name. Also verify all hyperparameters.
-- Verify disk space by running ```df -h .``` inside your ```/scratch/$USER``` directory. You should see a low amount of used storage space (I see 28G) and lots of available storage space (I see 1.5T). You must also see **Mounted on /scratch0** to ensure you are actually in the scratch space and not in your home folder.
-- Run ```pwd``` to ensure you are in the project root directory: **/scratch0/$USER/repo-name**. Navigate to this directory if not already there.
+If you edit any of the ROS packages in `src/`, rebuild from inside the container:
 
-99. Once all final checks are done, run the training script with the command below. The ```tee``` command will pipe the output to your screen and save it securely to a file called ```logs.txt```
+```bash
+cd /extend_robotics_ws
+colcon build
+source install/setup.bash
 ```
-python src/vla-train/train.py 2>&1 | tee logs.txt
-``` 
 
-## Terminating Remote Workstation Connection
+Python source files are copied into the install directory at build time, so a rebuild is needed to pick up changes. The MJCF and asset files in `mjcf/` and `assets/` are read directly from disk at runtime and don't require a rebuild.
 
-1. Before your workstation session ends, save the files you want to keep by downloading them to your local machine, or by uploading them to a GitHub branch.
+---
 
-2. Run these commands in VSCode to clear your personal scratch space:
-```
-cd                                        # go back to your home folder
-
-rm -rf /scratch0/$CS_USER/<repo-name>     # remove the repo in your scratch space
-
-cd /scratch0/$USER                        # after removing, go to your scratch space again
-ls -l                                     # check nothing is in your scratch space now
-total 0                                   # you should see this if nothing is left in your scratch space
-```
+## Reference
 
-2. Close the VSCode terminal, click on the blue **SSH: ucl-gpu** button in the bottom left corner, and choose the **Close Remote Connection** option. Finally, close VSCode, close the terminal window which acted as the SSH bridge between your local machine and the remote workstation, and disconnect from the Cisco VPN. 
+For a detailed breakdown of the physics, IK implementation, topic interface, and data format see [`DESC.md`](DESC.md). For a full list of copy-pasteable shell commands see [`COMMANDS.md`](COMMANDS.md).

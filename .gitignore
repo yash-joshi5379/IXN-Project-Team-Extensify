@@ -1,12 +1,21 @@
+# ROS 2 colcon build artifacts
+build/
+install/
+log/
+
+# Python
 __pycache__/
-.venv/
-smolvla_base_weights/
-smolvla_output/
-smolvla-model/
-act_output/
-dataset-v2/
-dataset-v2-processed-lerobot/
-dataset-v2-processed-lerobot_old/
-dataset-v2-processed-lerobot_v30/
-rerun-output/
-*.rrd
+*.py[cod]
+
+# MuJoCo runtime logs
+MJDATA.TXT
+MUJOCO_LOG.TXT
+
+# Recorded episode data (large binary files)
+data/*.parquet
+data/*.hdf5
+
+# Editor backups
+*.save
+*.swp
+*~

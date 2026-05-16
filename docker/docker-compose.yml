@@ -1,0 +1,21 @@
+name: extend_robotics_ixn
+
+services:
+  extend_sim:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: extend_robotics:latest
+    container_name: extend_robotics_ixn
+    environment:
+      - DISPLAY=${DISPLAY}
+      - XAUTHORITY=/root/.Xauthority
+      - MUJOCO_GL=egl
+    volumes:
+      - ../:/extend_robotics_ws
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ~/.Xauthority:/root/.Xauthority:rw
+    network_mode: host
+    privileged: true
+    stdin_open: true
+    tty: true
