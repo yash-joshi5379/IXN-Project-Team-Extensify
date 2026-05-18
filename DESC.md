@@ -2,195 +2,237 @@
 
 This workspace is a ROS 2 based environment for the **Extend Robotics VLA (Vision-Language-Action)** project. It provides a simulation-to-data pipeline for collecting robotic demonstration data using MuJoCo.
 
-## 🏗️ Architecture Overview
-
-The project is organized as a standard ROS 2 workspace:
+## Architecture Overview
 
 ```text
-/home/shcooray/extend_robotics_ws/
+IXN-Project-Team-Extensify/
 ├── assets/             # Robot meshes (STL) and MuJoCo XMLs
-│   ├── xarm7/          # xArm7 assets and configuration
-│   └── xhand1/         # xHand multi-fingered hand assets
-├── data/               # Recorded demonstration episodes (HDF5)
-├── docker/             # Containerization files (Dockerfile, Compose)
+│   ├── xarm7/          # xArm7 arm + gripper assets
+│   └── xhand1/         # xHand1 multi-fingered hand meshes
+├── data/               # Recorded demonstration episodes (Parquet)
+├── docker/             # Dockerfile and docker-compose.yml
 ├── mjcf/               # MuJoCo scene definition files
-└── src/                # ROS 2 package source code
+└── src/
     ├── extend_bringup/ # Launch files and global configurations
-    ├── extend_recorder/# Data collection and HDF5 serialization
-    ├── extend_sim/     # MuJoCo physics and rendering nodes
-    └── extend_teleop/  # Keyboard-based control interface
+    ├── extend_recorder/# Data collection and Parquet serialization
+    ├── extend_sim/     # MuJoCo physics, rendering, and viewer nodes
+    └── extend_teleop/  # Keyboard-based teleoperation interface
 ```
 
-The project is divided into several ROS 2 packages:
+**ROS 2 packages:**
 
-- **`extend_sim`**: Core simulation package using **MuJoCo**.
-  - `sim_node.py`: Manages the physics engine, robot state, and wrist camera rendering.
-  - `viewer_node.py`: Provides a live 3D visualization of the simulation.
-- **`extend_teleop`**: Teleoperation interface.
-  - `teleop_node.py`: Maps keyboard inputs (W/A/S/D/Q/E/SPACE) to end-effector velocity commands and gripper actions.
-- **`extend_recorder`**: Data collection utility.
-  - `recorder_node.py`: Captures observations and actions at 10Hz and saves them as HDF5 files for training VLA models.
-- **`extend_bringup`**: Launch configurations.
-  - `sim.launch.py`: Unified entry point to start simulation and recording nodes.
+- **`extend_sim`** — Core simulation. `sim_node.py` runs the physics engine, IK controller, and both camera renderers. `viewer_node.py` provides a live passive 3D viewer.
+- **`extend_teleop`** — Keyboard teleoperation. Maps W/A/S/D/Q/E/Space/P/R to Cartesian EE delta commands and gripper/hand control.
+- **`extend_recorder`** — Episode recording. Captures observations and actions at 10 Hz and serialises them to Parquet.
+- **`extend_bringup`** — Launch entry point. `sim.launch.py` starts the sim, recorder, and viewer together.
 
-## ⚙️ Simulation Mechanics
+---
+
+## Simulation Mechanics
 
 ### Physics & Control
-- **Engine**: MuJoCo physics running at **1000Hz** (1ms timestep).
-- **Control Strategy**: **Differential Inverse Kinematics (IK)**. The simulation accepts Cartesian delta commands for the end-effector (EE) and maps them to joint velocities/positions.
-- **IK Algorithm**: Uses the **Jacobian pseudo-inverse** method with Levenberg-Marquardt regularization (`λ = 0.05`) for singularity robustness and stability.
+
+- **Engine**: MuJoCo at **1000 Hz** (1 ms timestep), `integrator=implicitfast`.
+- **Control strategy**: Differential Inverse Kinematics. Cartesian delta commands from teleop are mapped to joint positions via the Jacobian pseudo-inverse.
+- **IK algorithm**: Damped least-squares (Levenberg-Marquardt), λ = 0.05.
 - **Actuation**:
-  - **Arm Joints**: 7-DOF position-controlled via actuator targets updated by the IK loop.
-  - **Gripper**: Position-controlled via the `split` tendon (PD on tendon position). Command `0.0` = open (tendon pos 0 rad), `1.0` = closed (tendon pos 0.85 rad).
-  - **xHand**: Postural interpolation. Commands are mapped to a linear blend between predefined `OPEN` and `CLOSED` joint configurations.
+  - **Arm joints**: 7-DOF position-controlled (`biastype="affine"` PD actuators, `act1`–`act7`).
+  - **Gripper**: Position-controlled via the `split` tendon. `gainprm=150`, `biastype="affine"`, `biasprm="0 -150 -15"`, `ctrlrange="0 0.85"`. In `sim_node.py`, `hand_cmd` (0.0–1.0) maps to `ctrl = hand_cmd × 0.85`. Setting ctrl=0 actively drives the fingers open; ctrl=0.85 drives them closed.
+  - **xHand**: Postural interpolation across 12 DOF. `hand_cmd` linearly blends `XHAND_OPEN` and `XHAND_CLOSE` joint configurations; individual finger actuators are position-controlled.
 
 ### IK Physics
 
-The simulation translates Cartesian commands into joint positions using **Differential Inverse Kinematics**. This allows the operator to control the end-effector (EE) in 3D space without managing individual joint angles.
+#### 1. Jacobian Matrix
+MuJoCo computes a 3×7 translational Jacobian at the EE site using `mj_jacSite`:
 
-#### 1. The Jacobian Matrix ($J$)
-The Jacobian represents the linear mapping between joint velocities ($\dot{q}$) and EE velocities ($\dot{x}$). In `sim_node.py`, MuJoCo computes a $3 \times 7$ matrix (for X, Y, Z translation) using `mj_jacSite`:
-$$\dot{x} = J(q) \dot{q}$$
+$$\dot{x} = J(q)\,\dot{q}$$
 
-#### 2. Damped Least Squares (Levenberg-Marquardt)
-To solve for $\dot{q}$ while maintaining stability near singularities (e.g., when the arm is fully extended), the simulation employs **Levenberg-Marquardt regularization**. Instead of a simple pseudo-inverse, it uses a damping factor $\lambda = 0.05$:
-$$J_{inv} = J^T (J J^T + \lambda^2 I)^{-1}$$
-This "virtual damping" prevents the matrix from becoming ill-conditioned, ensuring the robot doesn't "explode" or jitter when it reaches the edges of its workspace.
+#### 2. Damped Least Squares
+To avoid instability near singularities the damped pseudo-inverse is used:
 
-#### 3. Motion Profile & Smoothing
-To ensure physics stability at the 1000Hz simulation rate, commands are not applied instantly. The system uses an exponential filter ($k=10.0$, giving a ~0.1s time constant) to smoothly interpolate the movement:
-$$fraction = 1 - e^{-k \cdot dt}$$
-$$\Delta step = move\_queue \times fraction$$
-This creates a natural acceleration/deceleration curve, preventing high-frequency oscillations in the MuJoCo solver.
+$$J_{\text{inv}} = J^T \left(J J^T + \lambda^2 I\right)^{-1}, \quad \lambda = 0.05$$
 
-#### 4. Control Loop Execution
-1. **Accumulate**: Teleop commands are buffered in `ee_delta_buf`.
-2. **Compute**: The Jacobian is sampled at the current state.
-3. **Solve**: The regularized inverse maps the filtered $\Delta step$ to joint deltas $\Delta q$.
-4. **Step**: Actuator targets are updated: $ctrl_{new} = ctrl_{old} + \Delta q$.
-5. **Simulate**: MuJoCo steps the physics engine to solve for forces and contacts.
+#### 3. Motion Smoothing
+Commands accumulate in `move_queue` and are drained by a first-order exponential filter (k = 10.0, time constant ≈ 0.1 s):
 
-### Rendering & Visualization
-- **SimNode**: Headless execution using **EGL** for high-performance offscreen rendering of the wrist camera (224x224 RGB).
-- **ViewerNode**: Interactive visualization using **GLFW**. It operates as a passive observer, mirroring the state of the physics engine by subscribing to `/joint_states`.
+$$\text{fraction} = 1 - e^{-k \cdot dt}, \qquad \Delta_{\text{step}} = \text{move\_queue} \times \text{fraction}$$
 
-## 🤖 Supported Robots & Scenes
+The queue is capped at `MAX_EE_SPEED / k = 0.05 m` to prevent backlog from key-repeat.
 
-The workspace currently supports the **xArm7** robotic arm with two end-effector configurations:
-1.  **`gripper`**: Standard parallel gripper.
-2.  **`xhand`**: A more complex multi-fingered hand (`xhand1`).
+#### 4. Speed Limits
+Applied after IK in every physics step:
 
-Assets for these are stored in `assets/` (STL/XML) and `mjcf/` (MuJoCo scene definitions).
+| Limit | Value | Where enforced |
+|-------|-------|----------------|
+| Max EE Cartesian speed | 0.5 m/s | `move_queue` cap in `_physics_loop` |
+| Max joint speed | π rad/s (180 °/s) | `dq` scaling in `_apply_ik` |
 
-## 📡 Network & Topics
+Both limits match the xArm7's rated maximums.
+
+#### 5. Control Loop
+1. **Accumulate** — teleop deltas buffered in `ee_delta_buf`.
+2. **Cap** — `move_queue` norm clamped to 0.05 m.
+3. **Filter** — exponential smoothing produces `delta_step`.
+4. **IK** — `delta_step` → `dq` via damped Jacobian.
+5. **Clamp** — `dq` scaled so no joint exceeds π rad/s.
+6. **Apply** — `ctrl[arm] += dq`, clamped to joint limits.
+7. **Step** — `mj_step` advances physics by 1 ms.
+
+### Rendering & Cameras
+
+Two cameras are rendered offscreen using EGL (headless) via a shared `mujoco.Renderer`:
+
+| Camera | Name in MJCF | Mounting | FOV | Published topic |
+|--------|-------------|----------|-----|-----------------|
+| Wrist | `wrist_cam` | On `xarm_gripper_base_link` (gripper) / `right_hand_link` (xhand), `pos="0 0 0.15"`, pointing downward | 60° | `/rgb_image` |
+| Overhead | `overhead_cam` | World-fixed at `pos="0.3 0 1.2"`, pointing straight down | default | `/overhead_image` |
+
+Both publish 224×224 RGB at 10 Hz. The `ViewerNode` uses GLFW for interactive 3D visualisation; press `Tab` in the viewer to cycle cameras.
+
+---
+
+## Supported Robots & Scenes
+
+### `scene_gripper` (`mjcf/scene_gripper.xml`)
+- Includes `assets/xarm7/xarm7.xml` (arm + parallel gripper).
+- **Task object**: orange cylinder, radius 0.025 m, height 0.06 m, mass 0.3 kg.
+- **Spawn zone**: 50×50 cm square, x ∈ [0.10, 0.60] m, y ∈ [0.10, 0.60] m. Visualised by a yellow border (4 non-collidable box geoms). Cylinder position is randomised within the zone on every launch and every reset, subject to reach constraints (0.28–0.62 m from base).
+- **Target zone**: semi-transparent green disc at [0.35, 0.35] — the exact centre of the spawn square. Collision disabled, visual only.
+- **Home keyframe** (`scene_home`): arm in upright over-table pose, gripper open, cylinder at a random valid position.
+
+### `scene_xhand` (`mjcf/scene_xhand.xml`)
+- Includes `assets/xarm7/xarm7_nohand.xml` (arm + xHand1 right hand).
+- Same task setup as the gripper scene.
+- 12-DOF hand; TCP site `right_hand_tcp` at `pos="0 0 0.13"` on `right_hand_link`.
+- **Home keyframe**: joint7 = 0 (hand pointing downward), arm position identical to gripper scene. Arm ctrl values match qpos so actuators hold the pose on reset rather than fighting it.
+- Arm actuators `act1`–`act7` are defined in `xarm7_nohand.xml`; the scene file adds only the 12 hand actuators.
+
+---
+
+## Network & Topics
 
 | Topic | Type | Freq | Description |
 | :--- | :--- | :--- | :--- |
-| `/joint_states` | `sensor_msgs/JointState` | 150Hz | Complete robot and object state (qpos). Matches real robot cadence. |
-| `/rgb_image` | `sensor_msgs/Image` | 10Hz | 224×224 RGB wrist camera feed (mounted on gripper base). |
-| `/overhead_image` | `sensor_msgs/Image` | 10Hz | 224×224 RGB static overhead camera at [0.3, 0, 1.2] m. |
-| `/ee_pose_cmd` | `geometry_msgs/Twist` | N/A | Cartesian delta commands (linear x, y, z). |
-| `/hand_cmd` | `std_msgs/Float32` | N/A | Hand state (0=Open, 1=Closed). |
-| `/reset_sim` | `std_msgs/Empty` | N/A | Resets sim to `scene_home` keyframe and re-randomizes cylinder. |
-| `/recorder_cmd` | `std_msgs/String` | N/A | Control recording: `start`, `stop`, `discard`. |
+| `/joint_states` | `sensor_msgs/JointState` | 150 Hz | Full `qpos` snapshot — arm + hand + freejoint objects. Matches real robot cadence. |
+| `/rgb_image` | `sensor_msgs/Image` | 10 Hz | 224×224 RGB wrist camera feed. |
+| `/overhead_image` | `sensor_msgs/Image` | 10 Hz | 224×224 RGB static overhead camera. |
+| `/ee_pose_cmd` | `geometry_msgs/Twist` | — | Cartesian delta commands (linear x, y, z only). |
+| `/hand_cmd` | `std_msgs/Float32` | — | Hand state: 0.0 = open, 1.0 = closed. |
+| `/reset_sim` | `std_msgs/Empty` | — | Resets to `scene_home` keyframe and re-randomises cylinder position. |
+| `/recorder_cmd` | `std_msgs/String` | — | `start` / `stop` / `discard` episode. |
 
-## 🕹️ Teleop Key Bindings
+---
+
+## Teleop Key Bindings
 
 | Key | Action |
 | :--- | :--- |
-| `W` / `S` | EE forward / backward (X) |
-| `A` / `D` | EE left / right (Y) |
-| `Q` / `E` | EE up / down (Z) |
-| `SPACE` | Toggle hand open / closed |
-| `R` | Reset simulation to `scene_home` keyframe |
+| `W` / `S` | EE forward / backward (X axis) |
+| `A` / `D` | EE left / right (Y axis) |
+| `Q` / `E` | EE up / down (Z axis) |
+| `Space` | Toggle gripper / hand open–closed |
+| `R` | Reset simulation and re-randomise cylinder |
 | `P` | Toggle precision mode (1 mm steps vs. 20 mm default) |
-| `X` / `ESC` | Quit teleop |
+| `X` / `Esc` | Quit teleop |
 
-Default step size is **20 mm** (`STEP = 0.02` m). Precision mode drops to **1 mm** — useful for fine placement near grasp targets.
+Default step size is **20 mm**. Precision mode (1 mm) is useful for fine placement. Both modes are subject to the 0.5 m/s EE speed cap.
 
-## 📊 Data Format (Parquet)
+---
 
-Recorded episodes are stored in `data/` as `episode_<scene>_<YYYYMMDD_HHMMSS>.parquet`. Compression: Snappy. Images are JPEG-encoded (quality 90) and stored as binary columns.
+## Data Format (Parquet)
 
-### Schema
+Episodes are saved to `data/` as `episode_<scene>_<YYYYMMDD_HHMMSS>.parquet` (Snappy compression). Images are JPEG-encoded at quality 90 and stored as binary columns.
 
 | Column | Type | Description |
 | :--- | :--- | :--- |
 | `frame_index` | `int32` | 0-based frame counter |
 | `timestamp` | `float64` | Unix wall-clock time |
-| `observation.joint_positions` | `list<float32>` | Full MuJoCo `qpos` snapshot (arm + hand + freejoint objects) |
-| `observation.wrist_image` | `binary` | JPEG bytes — wrist camera (224×224 RGB) |
-| `observation.overhead_image` | `binary` | JPEG bytes — static overhead camera (224×224 RGB) |
-| `action.ee_cmd` | `list<float32>` | Cartesian delta `[dx, dy, dz]` in metres |
-| `action.hand_cmd` | `float32` | `0.0` = open, `1.0` = closed |
+| `observation.joint_positions` | `list<float32>` | Full `qpos` vector (arm + hand + object freejoint) |
+| `observation.wrist_image` | `binary` | JPEG bytes — wrist camera |
+| `observation.overhead_image` | `binary` | JPEG bytes — overhead camera |
+| `action.ee_cmd` | `list<float32>` | Cartesian delta [dx, dy, dz] in metres |
+| `action.hand_cmd` | `float32` | 0.0 = open, 1.0 = closed |
 
-File-level metadata keys: `scene`, `timestamp`, `n_frames`, `img_width`, `img_height`, `jpeg_quality`.
+File-level metadata: `scene`, `timestamp`, `n_frames`, `img_width`, `img_height`, `jpeg_quality`.
 
-### Decoding images
-
+**Decoding images:**
 ```python
-import numpy as np, cv2, pyarrow.parquet as pq
+import pyarrow.parquet as pq, numpy as np, cv2
 
-table = pq.read_table('episode_gripper_....parquet')
+table = pq.read_table('data/episode_gripper_....parquet')
 df = table.to_pandas()
 
-# Decode one frame
 raw = np.frombuffer(df['observation.wrist_image'].iloc[0], np.uint8)
-bgr = cv2.imdecode(raw, cv2.IMREAD_COLOR)
-rgb = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)   # shape: (224, 224, 3)
+rgb = cv2.cvtColor(cv2.imdecode(raw, cv2.IMREAD_COLOR), cv2.COLOR_BGR2RGB)
 ```
 
-> Note: `joint_positions` is the **full** `qpos` vector — arm joints + hand/gripper joints + freejoint components of floating objects (7 values each: 3 pos + 4 quat). Ordering matches joint declaration order in the MJCF.
+> `joint_positions` is the full MuJoCo `qpos` vector — arm joints, hand/gripper joints, and 7 values per floating object (3 pos + 4 quat). Order matches joint declaration in the MJCF.
 
-## 🐳 Docker Setup
+---
 
-The workspace runs inside a Docker container based on `osrf/ros:humble-desktop-full`.
+## Docker Setup
 
-Key Python dependencies (pinned versions matter):
-- `mujoco` — physics engine
-- `numpy<2` — NumPy 2.x breaks MuJoCo C bindings
-- `opencv-python-headless<4.10`
-- `pyarrow`, `pandas` — episode storage and inspection
-- `scipy`, `pynput`
+Base image: `osrf/ros:humble-desktop-full`.
+Project name: `extend_robotics_ixn` · Container name: `extend_robotics_ixn`.
 
-The `docker-compose.yml` mounts the entire workspace as a bind-volume (`../:/extend_robotics_ws`) so edits on the host are reflected instantly inside the container without rebuilding. X11 forwarding is handled via `.Xauthority` and `/tmp/.X11-unix`, enabling the GLFW viewer window to display on the host desktop. The environment forces `MUJOCO_GL=egl` at the compose level to keep the headless sim node from touching the display.
+The workspace is bind-mounted as `../:/extend_robotics_ws`, so host edits are immediately visible inside the container. Python source changes still require `colcon build` because files are copied (not symlinked) into `install/`.
 
-## 🗺️ Scenes & Task Objects
+**Key Python dependencies (pinned versions matter):**
 
-### `scene_gripper`
-- Includes `xarm7.xml` (arm + parallel gripper).
-- **Task object**: a small orange cylinder (`0.025m radius × 0.06m tall`, 0.3 kg, friction-rich) placed at `[0.5, 0.0, 0.03]`.
-- **Target zone**: a semi-transparent green disc at `[0.5, 0.2]` (collision disabled, visual only).
-- **Home keyframe** (`scene_home`): arm in a safe upright pose, cylinder in starting position.
+| Package | Reason |
+|---------|--------|
+| `mujoco` | Physics engine |
+| `numpy<2` | NumPy 2.x breaks MuJoCo C bindings |
+| `opencv-python-headless<4.10` | Image encoding |
+| `pyarrow` | Parquet read/write |
+| `pandas` | Episode inspection |
+| `pynput`, `scipy` | Teleop and utilities |
 
-### `scene_xhand`
-- Includes `xhand1_right.xml` mounted on the xArm7.
-- 12-DOF hand controlled via postural interpolation between `XHAND_OPEN` and `XHAND_CLOSE` configs.
-- TCP site: `right_hand_tcp`.
+X11 forwarding is handled via `.Xauthority` and `/tmp/.X11-unix`. `MUJOCO_GL=egl` is set in the compose environment so the sim node never touches the display; the viewer node sets `MUJOCO_GL=glfw` in process to claim a GLFW window.
 
-## 🔧 Utility / Debug Scripts
+---
 
-These scripts run **inside the container** (not as ROS nodes) and are useful for inspecting the model:
+## Utility / Debug Scripts
+
+Run from inside the container with `python3 /extend_robotics_ws/<script>.py`:
 
 | Script | Purpose |
 | :--- | :--- |
-| `check_model.py` | Print all actuators, sites, joints, joint ranges, and keyframe qpos |
+| `check_model.py` | Print all actuators, sites, joints, ranges, and keyframe qpos |
 | `check_model_2.py` | Extended model inspection |
 | `check_collisions.py` | Print geom collision groups/types for the gripper scene |
 | `check_collisions_v2.py` | Extended collision debugging |
 
-Run them with `python3 /extend_robotics_ws/<script>.py` from inside the container.
+---
 
-## 🚀 Getting Started
+## Getting Started
 
-1.  **Environment**: Uses Docker (see `docker/`).
-2.  **Build the image** (first time): `cd ~/extend_robotics_ws/docker && docker compose build`
-3.  **Start container**: `docker compose up -d`
-4.  **Enter container**: `docker exec -it extend_robotics bash`
-5.  **Source workspace**: `source /extend_robotics_ws/install/setup.bash`
-6.  **Launch**: `ros2 launch extend_bringup sim.launch.py scene:=gripper`
-7.  **Control**: `ros2 run extend_teleop teleop_node`
-8.  **Record**: Publish `'start'`/`'stop'` to `/recorder_cmd`.
+```bash
+# [host] build image (first time only)
+cd ~/IXN-Project-Team-Extensify/docker && docker compose build
 
-Refer to `COMMANDS.md` for a detailed list of shell commands and topic references.
+# [host] start container
+docker compose up -d
 
+# [host] open a shell (repeat for each terminal)
+docker exec -it extend_robotics_ixn bash
+
+# [container] source workspace (run in every terminal)
+source /extend_robotics_ws/install/setup.bash
+
+# [container] launch simulation
+ros2 launch extend_bringup sim.launch.py scene:=gripper   # or scene:=xhand
+
+# [container] start teleoperation (separate terminal)
+ros2 run extend_teleop teleop_node
+```
+
+After any code change in `src/`, rebuild:
+```bash
+cd /extend_robotics_ws && colcon build
+source install/setup.bash
+```
+
+MJCF and asset files under `mjcf/` and `assets/` are read at runtime and do not require a rebuild.
+
+Refer to `COMMANDS.md` for a full command reference including recording and topic monitoring.

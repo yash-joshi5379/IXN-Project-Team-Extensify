@@ -1,0 +1,208 @@
+\documentclass[11pt, a4paper]{article}
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{microtype}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{parskip}
+\usepackage{titlesec}
+
+\hypersetup{colorlinks=true, linkcolor=black, citecolor=black, urlcolor=blue}
+
+\titleformat{\section}{\large\bfseries}{}{0em}{}[\titlerule]
+\titleformat{\subsection}{\normalsize\bfseries}{}{0em}{}
+
+\setlength{\parskip}{6pt}
+
+\title{\textbf{Differential Inverse Kinematics}\\
+       \large Mathematical Foundations of the xArm7 Control Pipeline}
+\author{}
+\date{}
+
+% -----------------------------------------------------------------------
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+% -----------------------------------------------------------------------
+\section{Problem Statement}
+
+A robot manipulator with $n$ joints has a \emph{configuration} $\mathbf{q} \in \mathbb{R}^n$ (the vector of joint angles) and an \emph{end-effector (EE) pose} $\mathbf{x} \in \mathbb{R}^m$ in task space. For the xArm7, $n = 7$ and $\mathbf{x}$ is the 3-D Cartesian position of the EE site, so $m = 3$.
+
+Forward kinematics (FK) maps configuration to pose:
+\[
+  \mathbf{x} = f(\mathbf{q})
+\]
+
+\emph{Inverse kinematics} (IK) is the inverse problem: given a desired EE motion $\Delta \mathbf{x}$, find the joint displacement $\Delta \mathbf{q}$ that produces it. Because $f$ is nonlinear and the system is redundant ($n > m$), a closed-form solution is generally intractable. Instead, the \emph{differential} (velocity-level) formulation is used.
+
+% -----------------------------------------------------------------------
+\section{The Jacobian Matrix}
+
+Differentiating FK with respect to time gives the \emph{Jacobian} $\mathbf{J}(\mathbf{q})$, a $m \times n$ matrix that linearly relates joint velocities to EE velocity:
+\[
+  \dot{\mathbf{x}} = \mathbf{J}(\mathbf{q})\,\dot{\mathbf{q}}, \qquad
+  J_{ij}(\mathbf{q}) = \frac{\partial x_i}{\partial q_j}
+\]
+
+The Jacobian is configuration-dependent and must be recomputed at each control step. In the simulation it is evaluated using MuJoCo's \texttt{mj\_jacSite}, which returns the $3 \times 7$ \emph{translational} Jacobian at the EE site:
+\[
+  \mathbf{J} = \frac{\partial \mathbf{p}_{\text{EE}}}{\partial \mathbf{q}} \in \mathbb{R}^{3 \times 7}
+\]
+
+where $\mathbf{p}_{\text{EE}} \in \mathbb{R}^3$ is the Cartesian position of the EE site. Orientation is not included because the teleop interface commands only translational deltas.
+
+% -----------------------------------------------------------------------
+\section{The Naive Pseudo-Inverse}
+
+Given a desired EE displacement $\Delta \mathbf{x}$, the IK problem at the differential level is:
+\[
+  \Delta \mathbf{x} = \mathbf{J}\,\Delta \mathbf{q}
+\]
+
+This is an underdetermined linear system ($m < n$). The minimum-norm least-squares solution is given by the Moore-Penrose pseudo-inverse:
+\[
+  \Delta \mathbf{q} = \mathbf{J}^{+}\,\Delta \mathbf{x}, \qquad
+  \mathbf{J}^{+} = \mathbf{J}^T\!\left(\mathbf{J}\mathbf{J}^T\right)^{-1}
+\]
+
+This selects the solution $\Delta \mathbf{q}$ with smallest Euclidean norm, which tends to distribute motion evenly across joints and avoid unnecessary movement in the null space.
+
+% -----------------------------------------------------------------------
+\section{Singularities and the Damped Least Squares Method}
+
+\subsection{The Singularity Problem}
+
+A kinematic \emph{singularity} occurs when $\mathbf{J}$ loses full row rank — equivalently, when $\det(\mathbf{J}\mathbf{J}^T) \approx 0$. Physically, this corresponds to configurations where the arm is fully extended, folded back on itself, or aligned along a degenerate axis. Near such configurations:
+\[
+  \left(\mathbf{J}\mathbf{J}^T\right)^{-1} \longrightarrow \infty
+\]
+
+The naive pseudo-inverse amplifies small EE errors into arbitrarily large joint velocities, causing the simulated arm to \emph{jitter} or \emph{explode} at workspace boundaries.
+
+\subsection{Levenberg-Marquardt Regularisation}
+
+The \emph{damped least-squares} (DLS) method, also known as Levenberg-Marquardt regularisation, adds a damping term $\lambda^2\mathbf{I}$ to the matrix that must be inverted:
+\[
+  \boxed{
+    \mathbf{J}_{\text{damp}} = \mathbf{J}^T\!\left(\mathbf{J}\mathbf{J}^T + \lambda^2\mathbf{I}\right)^{-1}
+  }
+\]
+
+The regularised joint displacement is then:
+\[
+  \Delta \mathbf{q} = \mathbf{J}_{\text{damp}}\,\Delta \mathbf{x}
+\]
+
+\subsection{Effect of the Damping Factor}
+
+The matrix $(\mathbf{J}\mathbf{J}^T + \lambda^2\mathbf{I})$ has eigenvalues $\sigma_i^2 + \lambda^2 > 0$ for all singular values $\sigma_i \geq 0$, so it is always invertible regardless of the arm configuration. This can be understood via the SVD of $\mathbf{J} = \mathbf{U}\mathbf{\Sigma}\mathbf{V}^T$:
+
+\[
+  \mathbf{J}_{\text{damp}} = \mathbf{V}\,\tilde{\mathbf{\Sigma}}\,\mathbf{U}^T, \qquad
+  \tilde{\sigma}_i = \frac{\sigma_i}{\sigma_i^2 + \lambda^2}
+\]
+
+When $\sigma_i \gg \lambda$ (away from singularity), $\tilde{\sigma}_i \approx \sigma_i^{-1}$ and the solution approaches the pseudo-inverse. When $\sigma_i \ll \lambda$ (near singularity), $\tilde{\sigma}_i \approx \sigma_i / \lambda^2$ and the contribution of that mode is suppressed rather than amplified. The trade-off is accuracy: DLS introduces a small EE tracking error proportional to $\lambda^2 / \sigma_i$ in the affected directions.
+
+In the implementation the damping factor is fixed at $\lambda = 0.05$, providing robustness without noticeably degrading tracking under normal operation.
+
+% -----------------------------------------------------------------------
+\section{Motion Smoothing}
+
+Commands from the keyboard arrive as discrete impulses (a fixed $\Delta \mathbf{x}_{\text{step}}$ per keypress). Applied directly to a 1000 Hz physics engine, these would create high-frequency force spikes. A first-order exponential filter smooths the motion profile.
+
+\subsection{Exponential Decay Filter}
+
+Commands accumulate in a \emph{move queue} $\mathbf{m} \in \mathbb{R}^3$. At each physics timestep $\Delta t$ the queue is drained by an exponentially decaying fraction:
+\[
+  \alpha = 1 - e^{-k\,\Delta t}
+\]
+\[
+  \Delta \mathbf{x}_{\text{applied}} = \alpha\,\mathbf{m}, \qquad
+  \mathbf{m} \leftarrow (1 - \alpha)\,\mathbf{m} = \mathbf{m} - \Delta \mathbf{x}_{\text{applied}}
+\]
+
+With $k = 10.0$ and $\Delta t = 0.001\,\text{s}$, the filter time constant is $\tau = 1/k = 0.1\,\text{s}$, giving a smooth exponential approach to each target that damps out oscillations in the MuJoCo solver.
+
+The peak EE speed from a single queued command of magnitude $\|\mathbf{m}\|$ is:
+\[
+  v_{\text{peak}} = \frac{\|\mathbf{m}\|\,\alpha}{\Delta t} \approx \|\mathbf{m}\| \cdot k
+\]
+
+\subsection{Queue Cap}
+
+To prevent prolonged motion after key-release (backlog) the queue norm is capped before draining:
+\[
+  \mathbf{m} \leftarrow \mathbf{m}\cdot\min\!\left(1,\,\frac{v_{\max}}{k\,\|\mathbf{m}\|}\right)
+\]
+
+where $v_{\max} = 0.5\,\text{m/s}$. This bounds the instantaneous EE speed at all times.
+
+% -----------------------------------------------------------------------
+\section{Speed Limiting}
+
+\subsection{Cartesian Speed Limit}
+
+The queue cap described above ensures:
+\[
+  \left\|\dot{\mathbf{p}}_{\text{EE}}\right\|_2 \leq v_{\max} = 0.5\,\text{m/s}
+\]
+
+\subsection{Joint Speed Limit}
+
+After computing $\Delta \mathbf{q}$, an additional per-joint speed check is applied. The joint velocity at step $k$ is $\dot{q}_i = \Delta q_i / \Delta t$. The entire vector is scaled uniformly to ensure no joint exceeds $\omega_{\max} = \pi\,\text{rad/s}$ (the xArm7 rated maximum):
+\[
+  s = \frac{\omega_{\max}\,\Delta t}{\max_i |\Delta q_i| + \epsilon}, \qquad
+  \Delta \mathbf{q} \leftarrow \min(s,\,1)\cdot\Delta \mathbf{q}
+\]
+
+Scaling the whole vector uniformly preserves the direction of EE motion; only the speed is reduced. The small $\epsilon = 10^{-9}$ avoids division by zero.
+
+% -----------------------------------------------------------------------
+\section{Full Control Loop}
+
+The complete per-timestep procedure is summarised below.
+
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{>{\bfseries}r l}
+\toprule
+Step & Operation \\
+\midrule
+1 & Receive teleop delta $\Delta\mathbf{x}_{\text{cmd}}$; accumulate into $\mathbf{m}$. \\
+2 & Cap: $\mathbf{m} \leftarrow \mathbf{m}\cdot\min\!\left(1,\; v_{\max}/\left(k\,\|\mathbf{m}\|\right)\right)$. \\
+3 & Filter: $\Delta\mathbf{x} = \alpha\,\mathbf{m}$;\; $\mathbf{m} \leftarrow \mathbf{m} - \Delta\mathbf{x}$. \\
+4 & Compute Jacobian $\mathbf{J}$ at current $\mathbf{q}$ via \texttt{mj\_jacSite}. \\
+5 & Solve: $\Delta\mathbf{q} = \mathbf{J}^T\!\left(\mathbf{J}\mathbf{J}^T + \lambda^2\mathbf{I}\right)^{-1}\Delta\mathbf{x}$. \\
+6 & Clamp: $\Delta\mathbf{q} \leftarrow \min\!\left(1,\; \omega_{\max}\Delta t / \max_i|\Delta q_i|\right)\cdot\Delta\mathbf{q}$. \\
+7 & Update: $\mathbf{q}_{\text{ctrl}} \leftarrow \text{clip}\!\left(\mathbf{q}_{\text{ctrl}} + \Delta\mathbf{q},\; \mathbf{q}_{\min}, \mathbf{q}_{\max}\right)$. \\
+8 & Advance simulation: \texttt{mj\_step}$(\Delta t = 1\,\text{ms})$. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% -----------------------------------------------------------------------
+\section{Parameter Summary}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{lll}
+\toprule
+Parameter & Value & Role \\
+\midrule
+$n$ & 7 & Number of arm joints (xArm7) \\
+$m$ & 3 & Task-space dimension (Cartesian position) \\
+$\lambda$ & $0.05$ & LM damping factor \\
+$k$ & $10.0\,\text{s}^{-1}$ & Exponential filter gain \\
+$\Delta t$ & $0.001\,\text{s}$ & Physics timestep (1000 Hz) \\
+$v_{\max}$ & $0.5\,\text{m/s}$ & Maximum EE Cartesian speed \\
+$\omega_{\max}$ & $\pi\,\text{rad/s}$ & Maximum joint speed (180\,°/s) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\end{document}
