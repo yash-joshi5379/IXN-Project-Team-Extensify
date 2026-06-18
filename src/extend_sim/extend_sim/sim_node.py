@@ -123,8 +123,10 @@ class SimNode(Node):
         self.move_queue   = np.zeros(3)
         self.lock         = threading.Lock()
 
-        # Randomize cylinder before the physics thread starts
+        # Randomize peg+disc, then propagate positions so the renderer sees
+        # the correct state before the first physics step.
         self._randomize_cylinder()
+        mujoco.mj_forward(self.model, self.data)
 
         # physics thread
         self.running = True
@@ -173,20 +175,25 @@ class SimNode(Node):
             mujoco.mj_forward(self.model, self.data)
 
     def _randomize_cylinder(self):
-        """Place the cylinder at a random position in the 30×30 cm zone centred at [0.35, 0.35].
+        """Randomise peg and disc within the 30×30 cm black-tape zone.
 
-        Samples are rejected if outside the arm's reliable reach (0.28 m – 0.62 m from base).
+        Tape bounds: x ∈ [0.15, 0.45], y ∈ [0.05, 0.35], centred at [0.30, 0.20].
+        The disc is placed at the same (x, y) as the peg so it appears as a
+        visual marker beneath the peg.  The disc uses contype=2/conaffinity=2 so
+        it only collides with the ground — never with the cylinder or gripper —
+        meaning it stays on the floor when the peg is lifted.
+        Samples are rejected outside the arm's reliable reach (0.20–0.60 m).
         Caller must hold self.lock (or call before the physics thread starts).
         """
         cyl_jid = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_JOINT, 'cylinder_joint')
         if cyl_jid < 0:
             return  # scene has no cylinder
 
-        # 50×50 cm square centred at [0.35, 0.35]: x/y ∈ [0.10, 0.60]
-        X_RANGE = (0.10, 0.60)
-        Y_RANGE = (0.10, 0.60)
-        MIN_REACH = 0.28  # m — closer and the gripper can't orient to grasp
-        MAX_REACH = 0.62  # m — reliable workspace boundary
+        # 30×30 cm tape zone centred at [0.30, 0.20]: x ∈ [0.15, 0.45], y ∈ [0.05, 0.35]
+        X_RANGE = (0.15, 0.45)
+        Y_RANGE = (0.05, 0.35)
+        MIN_REACH = 0.20  # m — closer and the gripper can't orient to grasp
+        MAX_REACH = 0.60  # m — reliable workspace boundary
 
         rng = np.random.default_rng()
         for _ in range(200):
@@ -195,15 +202,26 @@ class SimNode(Node):
             if MIN_REACH <= np.hypot(x, y) <= MAX_REACH:
                 break
         else:
-            x, y = 0.35, 0.35  # fallback to zone centre
+            x, y = 0.30, 0.20  # fallback to zone centre
 
+        # Place the red peg flat on the floor (z=0.040: half-height of cylinder)
         qadr = self.model.jnt_qposadr[cyl_jid]
-        self.data.qpos[qadr:qadr+3] = [x, y, 0.03]   # position
-        self.data.qpos[qadr+3:qadr+7] = [1, 0, 0, 0]  # identity quaternion
+        self.data.qpos[qadr:qadr+3] = [x, y, 0.040]
+        self.data.qpos[qadr+3:qadr+7] = [1, 0, 0, 0]
         dadr = self.model.jnt_dofadr[cyl_jid]
-        self.data.qvel[dadr:dadr+6] = 0.0              # zero velocity
+        self.data.qvel[dadr:dadr+6] = 0.0
 
-        self.get_logger().info(f'Cylinder spawned at ({x:.3f}, {y:.3f})')
+        # Place the black disc at the same (x, y), flat on the floor (z=0.001).
+        # Disc has no collision with cylinder/gripper so it will never be lifted.
+        disc_jid = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_JOINT, 'disc_joint')
+        if disc_jid >= 0:
+            dqadr = self.model.jnt_qposadr[disc_jid]
+            self.data.qpos[dqadr:dqadr+3] = [x, y, 0.001]
+            self.data.qpos[dqadr+3:dqadr+7] = [1, 0, 0, 0]
+            ddadr = self.model.jnt_dofadr[disc_jid]
+            self.data.qvel[ddadr:ddadr+6] = 0.0
+
+        self.get_logger().info(f'Peg + disc spawned at ({x:.3f}, {y:.3f})')
 
     def _physics_loop(self):
         while self.running:

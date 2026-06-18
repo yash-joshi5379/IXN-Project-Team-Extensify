@@ -15,9 +15,17 @@ cd ~/IXN-Project-Team-Extensify/docker && docker compose up -d
 # [host] enter container (repeat for each new terminal)
 docker exec -it extend_robotics_ixn bash
 
+# [docker] FIRST TIME ONLY — build the workspace (creates install/).
+# Required on a fresh checkout; the repo ships source only, no install/ dir.
+cd /extend_robotics_ws && colcon build
+
 # [docker] source workspace (run in every terminal you open)
 source /extend_robotics_ws/install/setup.bash
 ```
+
+> If `source .../install/setup.bash` reports "No such file or directory" or
+> `ros2 launch` says `Package 'extend_bringup' not found`, the workspace has
+> not been built yet — run the `colcon build` step above first.
 
 ---
 

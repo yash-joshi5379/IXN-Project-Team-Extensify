@@ -18,50 +18,183 @@
     <texture name="groundplane" type="2d" builtin="checker"
              rgb1="0.2 0.2 0.2" rgb2="0.3 0.3 0.3" width="512" height="512"/>
     <material name="groundplane" texture="groundplane" texrepeat="5 5" texuniform="true"/>
-    <material name="cylinder_obj" rgba="0.8 0.3 0.1 1"/>
-    <material name="target"       rgba="0.2 0.8 0.2 0.4"/>
+    <material name="cylinder_obj" rgba="1.0 0.10 0.10 1"/>
+    <material name="cardboard"    rgba="0.72 0.52 0.30 1"/>
+    <material name="white_cube"   rgba="0.95 0.95 0.95 1"/>
   </asset>
 
   <worldbody>
     <light pos="0 0 1.5" dir="0 0 -1" directional="true"/>
     <geom name="ground" type="plane" size="2 2 0.05" material="groundplane"
-          conaffinity="1" condim="3"/>
+          contype="1" conaffinity="3" condim="3"/>
 
-    <!-- task object: cylinder to pick -->
-    <body name="cylinder_obj" pos="0.5 0.0 0.03">
-      <freejoint name="cylinder_joint"/>
-      <geom type="cylinder" size="0.025 0.03" material="cylinder_obj"
-            mass="0.3" condim="4" friction="1.2 0.01 0.001"
+    <!-- ── Black disc (position indicator, separate from peg) ───────────────
+         Separate freejoint body: stays on the floor when the peg is lifted.
+         Only moves if the end-effector physically contacts it.
+         Half-height = 1 mm → centre z = 0.001 m.  Appears as a thin surface
+         marking; not visible as a raised object from above the table.      -->
+    <body name="black_disc" pos="0.30 0.30 0.001">
+      <freejoint name="disc_joint"/>
+      <geom type="cylinder" size="0.040 0.001"
+            rgba="0.08 0.08 0.08 0.85"
+            mass="0.05" condim="3" friction="1.0 0.01 0.001"
+            contype="2" conaffinity="2"
             solimp="0.95 0.99 0.001" solref="0.001 1"/>
-      <site name="cylinder_top" pos="0 0 0.03" size="0.005"/>
     </body>
 
-    <!-- target placement zone -->
-    <body name="target_site" pos="0.35 0.35 0.001">
-      <geom type="cylinder" size="0.028 0.001" material="target"
-            contype="0" conaffinity="0"/>
+    <!-- ── Pick-up object: red peg ──────────────────────────────────────────
+         z = 0.043 puts the peg bottom 1 mm above the disc top (z 0.002) so
+         there is no zero-penetration at initialisation.  The peg settles
+         onto the disc within the first physics step.                       -->
+    <body name="cylinder_obj" pos="0.30 0.30 0.043">
+      <freejoint name="cylinder_joint"/>
+      <geom type="cylinder" size="0.015 0.040" material="cylinder_obj"
+            mass="0.15" condim="4" friction="1.2 0.01 0.001"
+            contype="1" conaffinity="1"
+            solimp="0.95 0.99 0.001" solref="0.001 1"/>
+      <site name="cylinder_top" pos="0 0 0.040" size="0.005"/>
     </body>
 
-    <!-- Cylinder spawn zone border (50x50 cm centred at [0.35, 0.35]) -->
+    <!-- ── Cardboard box (static platform) ──────────────────────────────────
+         Matches the physical cardboard box.  Top surface at z = 0.105 m.  -->
+    <body name="cardboard_box" pos="0.40 -0.10 0.0525">
+      <geom type="box" size="0.12 0.09 0.0525" material="cardboard"
+            contype="1" conaffinity="1"/>
+    </body>
+
+    <!-- ── White hollow cylinder (drop target) ──────────────────────────────
+         Body origin sits at the top surface of the cardboard box (z 0.105 m).
+
+         Structure
+         ─────────
+         • Base disk   : solid white floor, type=cylinder, r=30 mm, h=10 mm
+                         world z [0.105, 0.115]
+         • Tube walls  : 24 tangential box segments at 15° steps (r_center=26 mm)
+                         inner r = 22 mm  →  +7 mm loose clearance vs peg r=15 mm
+                         outer r = 30 mm  →  8 mm wall thickness
+                         segment: radial half=4 mm, tangential half=3 mm, h half=30 mm
+                         tube top = world z 0.105 + 0.010 + 0.060 = 0.175 m
+         • Euler angles in RADIANS (compiler angle="radian" from xarm7.xml)
+
+         Peg (80 mm tall) seats on the disk floor; tip extends ~20 mm above tube. -->
+    <body name="slot_cube" pos="0.40 -0.10 0.105">
+
+      <!-- Base disk (cylinder floor) -->
+      <geom type="cylinder" size="0.030 0.005" pos="0 0 0.005"
+            material="white_cube" contype="1" conaffinity="1"
+            friction="0.8 0.01 0.001" condim="3"/>
+
+      <!-- Tube wall — 24 tangential segments at 15° steps
+           size: x=radial half (0.004), y=tangential half (0.003), z=height half (0.030)
+           centre of segments at r=0.026 m, z_body=0.040 m (base top + half-height)
+           euler_z = π/2 + θ  (aligns local-x to radial direction)              -->
+      <!--  θ=   0°  -->
+      <geom type="box" size="0.004 0.003 0.030" pos=" 0.02600  0.00000 0.040"
+            euler="0 0 1.5708" material="white_cube" contype="1" conaffinity="1"/>
+      <!--  θ=  15°  -->
+      <geom type="box" size="0.004 0.003 0.030" pos=" 0.02513  0.00673 0.040"
+            euler="0 0 1.8326" material="white_cube" contype="1" conaffinity="1"/>
+      <!--  θ=  30°  -->
+      <geom type="box" size="0.004 0.003 0.030" pos=" 0.02252  0.01300 0.040"
+            euler="0 0 2.0944" material="white_cube" contype="1" conaffinity="1"/>
+      <!--  θ=  45°  -->
+      <geom type="box" size="0.004 0.003 0.030" pos=" 0.01839  0.01839 0.040"
+            euler="0 0 2.3562" material="white_cube" contype="1" conaffinity="1"/>
+      <!--  θ=  60°  -->
+      <geom type="box" size="0.004 0.003 0.030" pos=" 0.01300  0.02252 0.040"
+            euler="0 0 2.6180" material="white_cube" contype="1" conaffinity="1"/>
+      <!--  θ=  75°  -->
+      <geom type="box" size="0.004 0.003 0.030" pos=" 0.00673  0.02513 0.040"
+            euler="0 0 2.8798" material="white_cube" contype="1" conaffinity="1"/>
+      <!--  θ=  90°  -->
+      <geom type="box" size="0.004 0.003 0.030" pos=" 0.00000  0.02600 0.040"
+            euler="0 0 3.1416" material="white_cube" contype="1" conaffinity="1"/>
+      <!--  θ= 105°  -->
+      <geom type="box" size="0.004 0.003 0.030" pos="-0.00673  0.02513 0.040"
+            euler="0 0 3.4034" material="white_cube" contype="1" conaffinity="1"/>
+      <!--  θ= 120°  -->
+      <geom type="box" size="0.004 0.003 0.030" pos="-0.01300  0.02252 0.040"
+            euler="0 0 3.6652" material="white_cube" contype="1" conaffinity="1"/>
+      <!--  θ= 135°  -->
+      <geom type="box" size="0.004 0.003 0.030" pos="-0.01839  0.01839 0.040"
+            euler="0 0 3.9270" material="white_cube" contype="1" conaffinity="1"/>
+      <!--  θ= 150°  -->
+      <geom type="box" size="0.004 0.003 0.030" pos="-0.02252  0.01300 0.040"
+            euler="0 0 4.1888" material="white_cube" contype="1" conaffinity="1"/>
+      <!--  θ= 165°  -->
+      <geom type="box" size="0.004 0.003 0.030" pos="-0.02513  0.00673 0.040"
+            euler="0 0 4.4506" material="white_cube" contype="1" conaffinity="1"/>
+      <!--  θ= 180°  -->
+      <geom type="box" size="0.004 0.003 0.030" pos="-0.02600  0.00000 0.040"
+            euler="0 0 4.7124" material="white_cube" contype="1" conaffinity="1"/>
+      <!--  θ= 195°  -->
+      <geom type="box" size="0.004 0.003 0.030" pos="-0.02513 -0.00673 0.040"
+            euler="0 0 4.9742" material="white_cube" contype="1" conaffinity="1"/>
+      <!--  θ= 210°  -->
+      <geom type="box" size="0.004 0.003 0.030" pos="-0.02252 -0.01300 0.040"
+            euler="0 0 5.2360" material="white_cube" contype="1" conaffinity="1"/>
+      <!--  θ= 225°  -->
+      <geom type="box" size="0.004 0.003 0.030" pos="-0.01839 -0.01839 0.040"
+            euler="0 0 5.4978" material="white_cube" contype="1" conaffinity="1"/>
+      <!--  θ= 240°  -->
+      <geom type="box" size="0.004 0.003 0.030" pos="-0.01300 -0.02252 0.040"
+            euler="0 0 5.7596" material="white_cube" contype="1" conaffinity="1"/>
+      <!--  θ= 255°  -->
+      <geom type="box" size="0.004 0.003 0.030" pos="-0.00673 -0.02513 0.040"
+            euler="0 0 6.0214" material="white_cube" contype="1" conaffinity="1"/>
+      <!--  θ= 270°  -->
+      <geom type="box" size="0.004 0.003 0.030" pos=" 0.00000 -0.02600 0.040"
+            euler="0 0 6.2832" material="white_cube" contype="1" conaffinity="1"/>
+      <!--  θ= 285°  -->
+      <geom type="box" size="0.004 0.003 0.030" pos=" 0.00673 -0.02513 0.040"
+            euler="0 0 6.5450" material="white_cube" contype="1" conaffinity="1"/>
+      <!--  θ= 300°  -->
+      <geom type="box" size="0.004 0.003 0.030" pos=" 0.01300 -0.02252 0.040"
+            euler="0 0 6.8068" material="white_cube" contype="1" conaffinity="1"/>
+      <!--  θ= 315°  -->
+      <geom type="box" size="0.004 0.003 0.030" pos=" 0.01839 -0.01839 0.040"
+            euler="0 0 7.0686" material="white_cube" contype="1" conaffinity="1"/>
+      <!--  θ= 330°  -->
+      <geom type="box" size="0.004 0.003 0.030" pos=" 0.02252 -0.01300 0.040"
+            euler="0 0 7.3304" material="white_cube" contype="1" conaffinity="1"/>
+      <!--  θ= 345°  -->
+      <geom type="box" size="0.004 0.003 0.030" pos=" 0.02513 -0.00673 0.040"
+            euler="0 0 7.5922" material="white_cube" contype="1" conaffinity="1"/>
+
+    </body>
+
+    <!-- ── Spawn-zone border (30×30 cm centred at [0.30, 0.20]) ─────────────
+         Black masking-tape rectangle.  Both peg and disc are randomised
+         strictly inside these bounds: x ∈ [0.15, 0.45], y ∈ [0.05, 0.35].
+         Positioned adjacent to the cardboard box (at y ≈ -0.10) so the
+         pick zone and drop zone are on the same side of the workspace.    -->
     <body name="spawn_zone_border" pos="0 0 0">
-      <geom type="box" size="0.25 0.003 0.001" pos="0.35 0.10 0.001"
-            rgba="1.0 0.85 0.0 1.0" contype="0" conaffinity="0"/>
-      <geom type="box" size="0.25 0.003 0.001" pos="0.35 0.60 0.001"
-            rgba="1.0 0.85 0.0 1.0" contype="0" conaffinity="0"/>
-      <geom type="box" size="0.003 0.25 0.001" pos="0.10 0.35 0.001"
-            rgba="1.0 0.85 0.0 1.0" contype="0" conaffinity="0"/>
-      <geom type="box" size="0.003 0.25 0.001" pos="0.60 0.35 0.001"
-            rgba="1.0 0.85 0.0 1.0" contype="0" conaffinity="0"/>
+      <geom type="box" size="0.15 0.003 0.001" pos="0.30  0.35 0.001"
+            rgba="0.10 0.10 0.10 1" contype="0" conaffinity="0"/>
+      <geom type="box" size="0.15 0.003 0.001" pos="0.30  0.05 0.001"
+            rgba="0.10 0.10 0.10 1" contype="0" conaffinity="0"/>
+      <geom type="box" size="0.003 0.15 0.001" pos="0.45  0.20 0.001"
+            rgba="0.10 0.10 0.10 1" contype="0" conaffinity="0"/>
+      <geom type="box" size="0.003 0.15 0.001" pos="0.15  0.20 0.001"
+            rgba="0.10 0.10 0.10 1" contype="0" conaffinity="0"/>
     </body>
 
-    <!-- cameras -->
-    <camera name="overhead_cam" pos="-0.6 -0.5 1.0" xyaxes="0.667 -0.745 0 0.445 0.398 0.801" fovy="60"/>
+    <!-- ── Static side camera (matches physical tripod camera) ──────────────
+         Name kept 'overhead_cam' so /overhead_image topic is unchanged.   -->
+    <camera name="overhead_cam"
+            pos="0.0 0.9 0.7"
+            xyaxes="-0.916 -0.401 0 0.227 -0.519 0.824"
+            fovy="60"/>
 
   </worldbody>
 
+  <!-- qpos layout  nq = 27
+       [0-12]  arm + gripper joints
+       [13-19] disc_joint   freejoint  (black_disc body, listed first)
+       [20-26] cylinder_joint freejoint (cylinder_obj body)              -->
   <keyframe>
-    <key name="scene_home" 
-         qpos="0 -.247 0 .909 0 1.15644 0 0 0 0 0 0 0 0.5 0.0 0.03 1 0 0 0"
+    <key name="scene_home"
+         qpos="0 -.247 0 .909 0 1.15644 0 0 0 0 0 0 0 0.30 0.20 0.001 1 0 0 0 0.30 0.20 0.040 1 0 0 0"
          ctrl="0 -.247 0 .909 0 1.15644 0 0"/>
   </keyframe>
 </mujoco>
